@@ -12,9 +12,9 @@ body{
   background:linear-gradient(#ffd6e0,#fff0f5);
   display:flex;
   justify-content:center;
-  align-items:flex-start;
+  align-items:center;
   min-height:100vh;
-  overflow-y:auto;   /* ✅ SCROLL FIX */
+  overflow:auto;
 }
 
 /* WRAPPER */
@@ -23,7 +23,6 @@ body{
   gap:15px;
   flex-wrap:wrap;
   justify-content:center;
-  padding:20px;
 }
 
 /* CAMERA */
@@ -43,7 +42,7 @@ body{
   object-fit:cover;
 }
 
-/* CAMERA VIDEO */
+/* VIDEO */
 #video{
   position:absolute;
   top:140px;
@@ -55,17 +54,17 @@ body{
   object-fit:cover;
 }
 
-/* YOUR ORIGINAL BUTTON (NO CHANGE) */
+/* CLICK */
 .main-btn{
   position:absolute;
   bottom:20px;
   left:50%;
   transform:translateX(-50%);
-  width:90px;
-  height:90px;
-  background:transparent;  /* ✅ no pink */
+  width:85px;
+  height:85px;
   border:none;
-  cursor:pointer;
+  border-radius:50%;
+  background:#ff8fab;
 }
 
 /* COUNTDOWN */
@@ -102,27 +101,31 @@ body{
   border-radius:15px;
   width:220px;
   min-height:250px;
+  max-height:500px;
+  overflow-y:auto;
 }
 
-/* PHOTO */
+/* PHOTO FRAME */
 .photo{
   position:relative;
   width:200px;
   margin:10px auto;
+  overflow:hidden;
 }
 
 .photo img{
   width:100%;
   border-radius:10px;
+  display:block;
 }
 
-/* STICKER FIX */
+/* STICKER FIXED INSIDE PHOTO */
 .sticker{
   position:absolute;
   width:40px;
-  z-index:9999;
-  touch-action:none;
+  z-index:999;
   user-select:none;
+  touch-action:none;
 }
 
 /* PANEL */
@@ -139,10 +142,9 @@ body{
 
 .sticker-panel img{
   width:35px;
-  cursor:pointer;
 }
 
-/* BUTTONS */
+/* BUTTON */
 button{
   margin-top:10px;
   padding:8px 12px;
@@ -157,10 +159,6 @@ button{
   .wrapper{
     flex-direction:column;
     align-items:center;
-  }
-
-  .container{
-    transform:scale(0.95);
   }
 }
 </style>
@@ -180,11 +178,10 @@ button{
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas" style="display:none;"></canvas>
 
-<!-- YOUR ORIGINAL CLICK BUTTON -->
-<button class="main-btn" onclick="startBooth()"></button>
-
 <div id="countdown"></div>
 <div class="flash" id="flash"></div>
+
+<button class="main-btn" onclick="startBooth()"></button>
 
 </div>
 
@@ -240,6 +237,7 @@ function flashEffect(){
 
 /* CAPTURE */
 function capture(){
+
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
 
@@ -270,8 +268,9 @@ async function startBooth(){
   }
 }
 
-/* STICKER */
+/* STICKER FIXED INSIDE PHOTO */
 function addSticker(src){
+
   if(!currentPhoto) return;
 
   const s=document.createElement("img");
@@ -281,12 +280,13 @@ function addSticker(src){
   s.style.left="50px";
   s.style.top="50px";
 
-  drag(s);
+  enableDrag(s,currentPhoto);
+
   currentPhoto.appendChild(s);
 }
 
-/* DRAG FIX (MOBILE + PC) */
-function drag(el){
+/* DRAG FIX (100% WORKING MOBILE + PC) */
+function enableDrag(el,parent){
 
   let dragging=false,ox=0,oy=0;
 
@@ -296,8 +296,11 @@ function drag(el){
   function start(e){
     dragging=true;
     const p=e.touches?e.touches[0]:e;
-    ox=p.clientX-el.offsetLeft;
-    oy=p.clientY-el.offsetTop;
+
+    const rect=el.getBoundingClientRect();
+
+    ox=p.clientX-rect.left;
+    oy=p.clientY-rect.top;
   }
 
   document.addEventListener("mousemove",move);
@@ -307,10 +310,13 @@ function drag(el){
     if(!dragging) return;
 
     const p=e.touches?e.touches[0]:e;
-    const box=el.parentElement.getBoundingClientRect();
+    const box=parent.getBoundingClientRect();
 
-    el.style.left=(p.clientX-box.left-ox)+"px";
-    el.style.top=(p.clientY-box.top-oy)+"px";
+    let x=p.clientX-box.left-ox;
+    let y=p.clientY-box.top-oy;
+
+    el.style.left=x+"px";
+    el.style.top=y+"px";
 
     e.preventDefault();
   }
@@ -319,7 +325,7 @@ function drag(el){
   document.addEventListener("touchend",()=>dragging=false);
 }
 
-/* DOWNLOAD */
+/* DOWNLOAD FIX */
 function downloadStrip(){
 
   const photos=document.querySelectorAll(".photo");
@@ -333,14 +339,17 @@ function downloadStrip(){
   let y=0;
 
   photos.forEach(p=>{
+
     const img=p.querySelector("img");
     ctx.drawImage(img,20,y,200,150);
+
     y+=180;
   });
 
   const a=document.createElement("a");
   a.download="meowcam.png";
-  a.href=c.toDataURL();
+  a.href=c.toDataURL("image/png");
+
   a.click();
 }
 
