@@ -17,7 +17,6 @@ body{
   overflow:auto;
 }
 
-/* WRAPPER */
 .wrapper{
   display:flex;
   gap:15px;
@@ -35,7 +34,6 @@ body{
   overflow:hidden;
 }
 
-/* BG */
 .bg-video{
   position:absolute;
   width:100%;
@@ -43,7 +41,7 @@ body{
   object-fit:cover;
 }
 
-/* CAMERA VIDEO */
+/* CAMERA */
 #video{
   position:absolute;
   top:50%;
@@ -88,15 +86,14 @@ body{
   background:white;
   opacity:0;
 }
-.flash.active{
-  animation:flash .3s;
-}
+.flash.active{ animation:flash .3s; }
+
 @keyframes flash{
   0%{opacity:1;}
   100%{opacity:0;}
 }
 
-/* SIDE WRAPPER FIX */
+/* SIDE */
 .side{
   display:flex;
   flex-direction:row;
@@ -114,7 +111,7 @@ body{
   box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
-/* STICKER SECTION (RIGHT SIDE OF STRIP) */
+/* STICKERS */
 .sticker-panel{
   background:white;
   padding:10px;
@@ -125,7 +122,6 @@ body{
   width:90px;
 }
 
-/* STICKER IMAGES */
 .sticker-panel img{
   width:35px;
   cursor:pointer;
@@ -148,18 +144,22 @@ body{
   position:absolute;
   width:55px;
   z-index:9999;
+  touch-action:none;
 }
 
-/* FILTER FIX (IMPORTANT FOR PHONE + LAPTOP) */
+/* ✅ FIX: FILTERS ALWAYS BELOW CAMERA */
 .filters{
-  margin-top:10px;
+  position:absolute;
+  top: 350px;   /* BELOW CAMERA AREA FIXED */
+  left:50%;
+  transform:translateX(-50%);
   display:flex;
-  flex-direction:column;
-  gap:8px;
-  align-items:center;
-  width:100%;
+  flex-direction:row;
+  gap:6px;
+  background:rgba(255,255,255,0.85);
+  padding:6px;
+  border-radius:12px;
 }
-
 
 /* BUTTON */
 button{
@@ -178,8 +178,6 @@ button{
   background:white;
   padding:8px;
   border-radius:10px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.1);
-  text-align:center;
 }
 </style>
 </head>
@@ -188,7 +186,6 @@ button{
 
 <div class="wrapper">
 
-<!-- CAMERA -->
 <div class="container">
 
 <video class="bg-video" autoplay muted loop>
@@ -203,7 +200,7 @@ button{
 
 <button class="main-btn" onclick="startBooth()"></button>
 
-<!-- FILTERS (NOW RESPONSIVE FIXED) -->
+<!-- FILTERS FIXED BELOW CAMERA -->
 <div class="filters">
 <button onclick="setFilter('none')">Normal</button>
 <button onclick="setFilter('contrast(1.2)')">Bright</button>
@@ -214,12 +211,11 @@ button{
 
 </div>
 
-<!-- SIDE (FIXED LAYOUT) -->
+<!-- SIDE -->
 <div class="side">
 
 <div id="strip"></div>
 
-<!-- STICKERS RIGHT SIDE -->
 <div class="sticker-panel">
 <img src="2.jpg" onclick="addSticker(this.src)">
 <img src="3.png" onclick="addSticker(this.src)">
@@ -244,7 +240,7 @@ const flash=document.getElementById("flash");
 let currentPhoto=null;
 let currentFilter="none";
 
-/* CAMERA FIX */
+/* CAMERA */
 navigator.mediaDevices.getUserMedia({video:true})
 .then(s=>video.srcObject=s);
 
@@ -306,7 +302,7 @@ async function startBooth(){
   }
 }
 
-/* STICKER */
+/* STICKER + DRAG FIX */
 function addSticker(src){
   if(!currentPhoto) return;
 
@@ -317,7 +313,39 @@ function addSticker(src){
   s.style.left="40px";
   s.style.top="40px";
 
+  makeDrag(s);
   currentPhoto.appendChild(s);
+}
+
+/* DRAG FIX */
+function makeDrag(el){
+  let dragging=false,ox=0,oy=0;
+
+  el.addEventListener("mousedown",start);
+  el.addEventListener("touchstart",start);
+
+  function start(e){
+    dragging=true;
+    const p=e.touches?e.touches[0]:e;
+    ox=p.clientX-el.offsetLeft;
+    oy=p.clientY-el.offsetTop;
+  }
+
+  document.addEventListener("mousemove",move);
+  document.addEventListener("touchmove",move,{passive:false});
+
+  function move(e){
+    if(!dragging) return;
+
+    const p=e.touches?e.touches[0]:e;
+    const box=el.parentElement.getBoundingClientRect();
+
+    el.style.left=(p.clientX-box.left-ox)+"px";
+    el.style.top=(p.clientY-box.top-oy)+"px";
+  }
+
+  document.addEventListener("mouseup",()=>dragging=false);
+  document.addEventListener("touchend",()=>dragging=false);
 }
 
 </script>
