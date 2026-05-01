@@ -5,17 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MEOWCAM V3 🐱💖</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
 <style>
 body{
   margin:0;
   font-family:"Comic Sans MS",cursive;
   background:linear-gradient(#ffd6e0,#fff0f5);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
 }
 
-/* CAMERA */
-.camera-box{
+/* MAIN LAYOUT */
+.wrapper{
+  display:flex;
+  gap:15px;
+}
+
+/* CAMERA BOX */
+.container{
   position:relative;
   width:350px;
   height:700px;
@@ -23,6 +31,7 @@ body{
   overflow:hidden;
 }
 
+/* VIDEO */
 .bg-video{
   position:absolute;
   width:100%;
@@ -30,6 +39,7 @@ body{
   object-fit:cover;
 }
 
+/* CAMERA */
 #video{
   position:absolute;
   top:50%;
@@ -38,145 +48,134 @@ body{
   width:290px;
   height:295px;
   border-radius:15px;
-  object-fit:cover;
 }
 
-#countdown{
+/* BUTTON */
+.main-btn{
   position:absolute;
-  top:220px;
+  bottom:20px;
   left:50%;
-  transform:translate(-50%,-50%);
-  font-size:40px;
-  color:#ff2e6d;
-  font-weight:bold;
+  transform:translateX(-50%);
+  width:90px;
+  height:90px;
+  background:transparent;
+  border:none;
+  cursor:pointer;
 }
-
-.flash{
-  position:absolute;
-  inset:0;
-  background:white;
-  opacity:0;
-}
-.flash.active{animation:flash .3s;}
-@keyframes flash{0%{opacity:1;}100%{opacity:0;}}
 
 /* FILTERS */
 .filters{
-  margin-top:10px;
+  margin-top:8px;
   display:flex;
   gap:5px;
   justify-content:center;
   flex-wrap:wrap;
 }
 
+/* SIDE */
+.side{
+  display:flex;
+  gap:10px;
+}
+
 /* STRIP */
 #strip{
+  width:220px;
+  min-height:250px;
+  background:white;
+  border-radius:15px;
+  padding:10px;
+}
+
+/* PHOTO */
+.photo{
+  width:200px;
+  margin:10px auto;
+  position:relative;
+}
+
+/* STICKER */
+.sticker{
+  position:absolute;
+  width:60px;
+  cursor:move;
+}
+
+/* PANEL */
+.sticker-panel{
+  width:90px;
   background:white;
   padding:10px;
   border-radius:15px;
-  width:220px;
-  min-height:250px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
-}
-
-/* STICKERS */
-.sticker-box{
-  position:absolute;
-  width:80px;
-}
-
-.handle{
-  width:14px;
-  height:14px;
-  background:#ff4d88;
-  position:absolute;
-  right:0;
-  bottom:0;
-  border-radius:50%;
-  cursor:nwse-resize;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
 }
 
 .sticker-panel img{
-  width:40px;
+  width:35px;
   cursor:pointer;
-  margin:3px;
 }
 
-/* CREDIT */
-.credit{
-  font-size:12px;
-  background:white;
-  padding:6px;
-  border-radius:10px;
-  text-align:center;
-  margin-top:10px;
+/* BUTTONS */
+button{
+  padding:6px 10px;
+  border:none;
+  border-radius:8px;
+  background:#ff8fab;
+  color:white;
+  cursor:pointer;
 }
 
-/* PREVIEW MODAL */
-.preview-box{
+/* PREVIEW */
+.preview{
   display:none;
   position:fixed;
   inset:0;
   background:rgba(0,0,0,0.7);
   justify-content:center;
   align-items:center;
-  z-index:9999;
 }
 
-.preview-content{
+.preview-box{
   background:white;
   padding:15px;
-  border-radius:15px;
-  text-align:center;
-}
-
-.preview-content img{
-  width:250px;
   border-radius:10px;
+  text-align:center;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container-fluid py-3">
-<div class="row justify-content-center">
+<div class="wrapper">
 
 <!-- CAMERA -->
-<div class="col-lg-4 col-md-6 col-12 d-flex flex-column align-items-center">
-
-<div class="camera-box">
+<div class="container">
 
 <video class="bg-video" autoplay muted loop>
 <source src="billu.mp4">
 </video>
 
 <video id="video" autoplay playsinline></video>
-<canvas id="canvas" class="d-none"></canvas>
+<canvas id="canvas" style="display:none;"></canvas>
 
-<div id="countdown"></div>
-<div class="flash" id="flash"></div>
+<button class="main-btn" onclick="startBooth()"></button>
 
+<div class="filters">
+<button onclick="setFilter('none')">Normal</button>
+<button onclick="setFilter('contrast(1.2)')">Bright</button>
+<button onclick="setFilter('sepia(1)')">Vintage</button>
+<button onclick="setFilter('grayscale(1)')">B&W</button>
+<button onclick="setFilter('brightness(1.3)')">Glow</button>
 </div>
 
-<!-- FILTERS -->
-<div class="filters mt-2">
-<button onclick="setFilter('none')" class="btn btn-sm btn-light">Normal</button>
-<button onclick="setFilter('contrast(1.2)')" class="btn btn-sm btn-light">Bright</button>
-<button onclick="setFilter('sepia(1)')" class="btn btn-sm btn-light">Vintage</button>
-<button onclick="setFilter('grayscale(1)')" class="btn btn-sm btn-light">B&W</button>
-<button onclick="setFilter('brightness(1.3)')" class="btn btn-sm btn-light">Glow</button>
-</div>
-
-<button class="btn btn-danger mt-2" onclick="startBooth()">CLICK 📸</button>
-
-<!-- NEW DONE BUTTON -->
-<button class="btn btn-success mt-2" onclick="finishStrip()">DONE ✔</button>
+<button onclick="finishStrip()">DONE ✔</button>
 
 </div>
 
 <!-- SIDE -->
-<div class="col-lg-4 col-md-6 col-12 d-flex gap-2">
+<div class="side">
 
 <div id="strip"></div>
 
@@ -185,24 +184,18 @@ body{
 <img src="3.png" onclick="addSticker(this.src)">
 <img src="4.png" onclick="addSticker(this.src)">
 <img src="6.png" onclick="addSticker(this.src)">
-<img src="7.png" onclick="addSticker(this.src)">
-<img src="8.png" onclick="addSticker(this.src)">
 </div>
 
 </div>
 
 </div>
-</div>
 
-<!-- PREVIEW MODAL -->
-<div class="preview-box" id="previewBox">
-  <div class="preview-content">
-    <h5>✨ Your Strip Preview</h5>
-    <img id="finalPreview">
-    <br><br>
-    <a id="downloadLink" class="btn btn-success">Download 💾</a>
-    <br><br>
-    <button class="btn btn-danger" onclick="closePreview()">Close</button>
+<!-- PREVIEW -->
+<div class="preview" id="preview">
+  <div class="preview-box">
+    <img id="finalImg" style="width:200px;"><br><br>
+    <a id="downloadBtn" download="meowcam.png">Download</a><br><br>
+    <button onclick="closePreview()">Close</button>
   </div>
 </div>
 
@@ -215,6 +208,7 @@ const strip=document.getElementById("strip");
 let currentPhoto=null;
 let currentFilter="none";
 
+/* CAMERA */
 navigator.mediaDevices.getUserMedia({video:true})
 .then(s=>video.srcObject=s);
 
@@ -252,97 +246,66 @@ async function startBooth(){
   strip.innerHTML="";
   for(let i=0;i<3;i++){
     capture();
-    await new Promise(r=>setTimeout(r,400));
+    await new Promise(r=>setTimeout(r,500));
   }
 }
 
-/* STICKER */
+/* DRAG STICKER (WORKING FIX) */
 function addSticker(src){
   if(!currentPhoto) return;
 
-  const box=document.createElement("div");
-  box.className="sticker-box";
-  box.style.left="40px";
-  box.style.top="40px";
-
   const img=document.createElement("img");
   img.src=src;
-  img.style.width="100%";
+  img.className="sticker";
+  img.style.left="40px";
+  img.style.top="40px";
 
-  const handle=document.createElement("div");
-  handle.className="handle";
+  currentPhoto.appendChild(img);
 
-  box.appendChild(img);
-  box.appendChild(handle);
-  currentPhoto.appendChild(box);
+  let drag=false,ox,oy;
 
-  drag(box);
-  resize(box,handle);
-}
-
-/* DRAG */
-function drag(el){
-  let drag=false,ox=0,oy=0;
-
-  el.onmousedown=e=>{
+  img.onmousedown=e=>{
     drag=true;
-    ox=e.clientX-el.offsetLeft;
-    oy=e.clientY-el.offsetTop;
+    ox=e.offsetX;
+    oy=e.offsetY;
   };
 
   document.onmousemove=e=>{
     if(!drag) return;
-    const p=el.parentElement.getBoundingClientRect();
-    el.style.left=(e.clientX-p.left-ox)+"px";
-    el.style.top=(e.clientY-p.top-oy)+"px";
+    const rect=currentPhoto.getBoundingClientRect();
+    img.style.left=(e.clientX-rect.left-ox)+"px";
+    img.style.top=(e.clientY-rect.top-oy)+"px";
   };
 
   document.onmouseup=()=>drag=false;
 }
 
-/* RESIZE */
-function resize(box,handle){
-  let resizing=false;
-
-  handle.onmousedown=e=>{
-    resizing=true;
-    e.stopPropagation();
-  };
-
-  document.onmousemove=e=>{
-    if(!resizing) return;
-    box.style.width=(box.offsetWidth + e.movementX)+"px";
-  };
-
-  document.onmouseup=()=>resizing=false;
-}
-
-/* DONE → PREVIEW + DOWNLOAD */
+/* DONE + DOWNLOAD */
 function finishStrip(){
-  const imgs=document.querySelectorAll(".photo img");
+
+  const photos=document.querySelectorAll(".photo img");
 
   const c=document.createElement("canvas");
   const ctx=c.getContext("2d");
 
   c.width=300;
-  c.height=imgs.length*300;
+  c.height=photos.length*300;
 
-  imgs.forEach((img,i)=>{
-    ctx.drawImage(img,0,i*300,300,300);
+  photos.forEach((p,i)=>{
+    ctx.drawImage(p,0,i*300,300,300);
   });
 
-  const final=c.toDataURL("image/png");
+  const final=c.toDataURL();
 
-  document.getElementById("finalPreview").src=final;
-  document.getElementById("downloadLink").href=final;
-  document.getElementById("downloadLink").download="meowcam-strip.png";
+  document.getElementById("finalImg").src=final;
+  document.getElementById("downloadBtn").href=final;
 
-  document.getElementById("previewBox").style.display="flex";
+  document.getElementById("preview").style.display="flex";
 }
 
 /* CLOSE */
 function closePreview(){
-  document.getElementById("previewBox").style.display="none";
+  document.getElementById("preview").style.display="none";
 }
 
 </script>
