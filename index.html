@@ -14,7 +14,7 @@ body{
   justify-content:center;
   align-items:center;
   min-height:100vh;
-  overflow:auto; /* ✅ SCROLL FIX */
+  overflow:auto;
 }
 
 /* WRAPPER */
@@ -23,7 +23,6 @@ body{
   gap:15px;
   flex-wrap:wrap;
   justify-content:center;
-  padding:20px;
 }
 
 /* CAMERA */
@@ -35,7 +34,6 @@ body{
   overflow:hidden;
 }
 
-/* VIDEO */
 .bg-video{
   position:absolute;
   width:100%;
@@ -43,18 +41,19 @@ body{
   object-fit:cover;
 }
 
+/* CAMERA VIDEO (NO MIRROR) */
 #video{
   position:absolute;
   top:140px;
   left:50%;
-  transform:translateX(-50%);
+  transform:translateX(-50%); /* ❌ mirror removed */
   width:240px;
   height:240px;
   border-radius:15px;
   object-fit:cover;
 }
 
-/* YOUR BUTTON */
+/* BUTTON (UNCHANGED) */
 .main-btn{
   position:absolute;
   bottom:20px;
@@ -103,7 +102,6 @@ body{
   min-height:250px;
   max-height:500px;
   overflow-y:auto;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
 /* PHOTO */
@@ -123,8 +121,8 @@ body{
   position:absolute;
   width:45px;
   z-index:9999;
-  touch-action:none;
   user-select:none;
+  touch-action:none;
 }
 
 /* PANEL */
@@ -152,23 +150,6 @@ button{
   border-radius:10px;
   background:#ff8fab;
   color:white;
-}
-
-/* GLITTER ✨ */
-.glitter{
-  position:fixed;
-  width:6px;
-  height:6px;
-  background:white;
-  border-radius:50%;
-  pointer-events:none;
-  animation:fall 2s linear forwards;
-  z-index:9999;
-}
-
-@keyframes fall{
-  0%{transform:translateY(-10vh);opacity:1;}
-  100%{transform:translateY(100vh);opacity:0;}
 }
 
 /* MOBILE */
@@ -250,20 +231,6 @@ async function timer(){
 function flashEffect(){
   flash.classList.add("active");
   setTimeout(()=>flash.classList.remove("active"),300);
-  spawnGlitter(); // ✨ glitter on click
-}
-
-/* GLITTER EFFECT */
-function spawnGlitter(){
-  for(let i=0;i<25;i++){
-    const g=document.createElement("div");
-    g.className="glitter";
-    g.style.left=Math.random()*window.innerWidth+"px";
-    g.style.top="-10px";
-    document.body.appendChild(g);
-
-    setTimeout(()=>g.remove(),2000);
-  }
 }
 
 /* CAPTURE */
@@ -273,6 +240,10 @@ function capture(){
   canvas.height=video.videoHeight;
 
   const ctx=canvas.getContext("2d");
+
+  // ❌ NO MIRROR (IMPORTANT FIX)
+  ctx.setTransform(1,0,0,1,0,0);
+
   ctx.drawImage(video,0,0);
 
   flashEffect();
@@ -281,7 +252,7 @@ function capture(){
   div.className="photo";
 
   const img=document.createElement("img");
-  img.src=canvas.toDataURL();
+  img.src=canvas.toDataURL("image/png");
 
   div.appendChild(img);
   strip.appendChild(div);
@@ -301,6 +272,7 @@ async function startBooth(){
 
 /* STICKER */
 function addSticker(src){
+
   if(!currentPhoto) return;
 
   const s=document.createElement("img");
@@ -348,7 +320,7 @@ function drag(el){
   document.addEventListener("touchend",()=>dragging=false);
 }
 
-/* 📸 DOWNLOAD (1080PX QUALITY FIX) */
+/* 📸 DOWNLOAD 1080 × 1920 FINAL EXPORT */
 function downloadStrip(){
 
   const photos=document.querySelectorAll(".photo");
@@ -356,23 +328,43 @@ function downloadStrip(){
   const c=document.createElement("canvas");
   const ctx=c.getContext("2d");
 
-  const scale=1080/220; // upscale factor
+  const W=1080;
+  const H=1920;
 
-  c.width=1080;
-  c.height=photos.length*800;
+  c.width=W;
+  c.height=H;
 
-  let y=0;
+  // background white
+  ctx.fillStyle="white";
+  ctx.fillRect(0,0,W,H);
+
+  let y=50;
 
   photos.forEach(p=>{
+
     const img=p.querySelector("img");
 
-    ctx.drawImage(img,0,y,1080,800);
+    ctx.drawImage(img,140,y,800,500);
 
-    y+=800;
+    // draw stickers (simple stable version)
+    p.querySelectorAll(".sticker").forEach(st=>{
+      const rect=st.getBoundingClientRect();
+      const parent=p.getBoundingClientRect();
+
+      const x=rect.left-parent.left;
+      const y2=rect.top-parent.top;
+
+      const sImg=new Image();
+      sImg.src=st.src;
+
+      ctx.drawImage(sImg,140+x, y+y2, 80, 80);
+    });
+
+    y+=520;
   });
 
   const a=document.createElement("a");
-  a.download="meowcam-1080.png";
+  a.download="meowcam-1080x1920.png";
   a.href=c.toDataURL("image/png");
   a.click();
 }
