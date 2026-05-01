@@ -14,8 +14,10 @@ body{
   justify-content:center;
   align-items:center;
   min-height:100vh;
+  overflow:auto;
 }
 
+/* WRAPPER */
 .wrapper{
   display:flex;
   gap:15px;
@@ -30,10 +32,9 @@ body{
   height:560px;
   border-radius:20px;
   overflow:hidden;
-  background:black;
 }
 
-/* BACKGROUND */
+/* BG */
 .bg-video{
   position:absolute;
   width:100%;
@@ -41,7 +42,7 @@ body{
   object-fit:cover;
 }
 
-/* ❌ NO MIRROR (SELFIE OFF) */
+/* VIDEO */
 #video{
   position:absolute;
   top:140px;
@@ -51,10 +52,9 @@ body{
   height:240px;
   border-radius:15px;
   object-fit:cover;
-  z-index:2;
 }
 
-/* YOUR ORIGINAL BUTTON (UNCHANGED POSITION) */
+/* YOUR ORIGINAL CLICK BUTTON (UNCHANGED) */
 .main-btn{
   position:absolute;
   bottom:20px;
@@ -77,7 +77,7 @@ body{
   font-size:45px;
   color:#ff2e6d;
   font-weight:bold;
-  z-index:9999;
+  z-index:1000;
 }
 
 /* FLASH */
@@ -86,6 +86,7 @@ body{
   inset:0;
   background:white;
   opacity:0;
+  pointer-events:none;
 }
 .flash.active{
   animation:flash .3s;
@@ -95,6 +96,13 @@ body{
   100%{opacity:0;}
 }
 
+/* SIDE */
+.side{
+  text-align:center;
+  max-height:90vh;
+  overflow:auto;
+}
+
 /* STRIP */
 #strip{
   background:white;
@@ -102,6 +110,7 @@ body{
   border-radius:15px;
   width:220px;
   min-height:250px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
 /* PHOTO */
@@ -116,13 +125,53 @@ body{
   border-radius:10px;
 }
 
-/* STICKER */
+/* STICKER FIX (IMPORTANT) */
 .sticker{
   position:absolute;
   width:45px;
   z-index:9999;
   touch-action:none;
   user-select:none;
+}
+
+/* PANEL */
+.sticker-panel{
+  margin-top:10px;
+  background:white;
+  padding:10px;
+  border-radius:15px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  justify-content:center;
+}
+
+.sticker-panel img{
+  width:35px;
+  cursor:pointer;
+}
+
+/* BUTTON */
+button{
+  margin-top:10px;
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  background:#ff8fab;
+  color:white;
+  cursor:pointer;
+}
+
+/* MOBILE FIX */
+@media(max-width:768px){
+  .wrapper{
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .container{
+    transform:scale(0.95);
+  }
 }
 </style>
 </head>
@@ -144,7 +193,6 @@ body{
 <div id="countdown"></div>
 <div class="flash" id="flash"></div>
 
-<!-- ✅ YOUR BUTTON ONLY -->
 <button class="main-btn" onclick="startBooth()"></button>
 
 </div>
@@ -154,10 +202,13 @@ body{
 
 <div id="strip"></div>
 
-<div>
-<img src="2.jpg" width="40" onclick="addSticker(this.src)">
-<img src="3.png" width="40" onclick="addSticker(this.src)">
-<img src="4.png" width="40" onclick="addSticker(this.src)">
+<div class="sticker-panel">
+<img src="2.jpg" onclick="addSticker(this.src)">
+<img src="3.png" onclick="addSticker(this.src)">
+<img src="4.png" onclick="addSticker(this.src)">
+<img src="6.png" onclick="addSticker(this.src)">
+<img src="7.png" onclick="addSticker(this.src)">
+<img src="8.png" onclick="addSticker(this.src)">
 </div>
 
 <button onclick="downloadStrip()">DOWNLOAD 💾</button>
@@ -178,13 +229,12 @@ let currentPhoto=null;
 
 /* CAMERA */
 navigator.mediaDevices.getUserMedia({video:true})
-.then(stream=>{
-  video.srcObject=stream;
-});
+.then(s=>video.srcObject=s);
 
 /* TIMER */
 async function timer(){
-  for(let t of ["Ready...","Set...","Paws 🐾"]){
+  const steps=["Ready...","Set...","Paws 🐾"];
+  for(let t of steps){
     countdown.innerText=t;
     await new Promise(r=>setTimeout(r,700));
   }
@@ -197,17 +247,12 @@ function flashEffect(){
   setTimeout(()=>flash.classList.remove("active"),300);
 }
 
-/* CAPTURE (NO MIRROR FIX) */
+/* CAPTURE */
 function capture(){
-
-  if(!video.videoWidth) return;
-
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
-
   const ctx=canvas.getContext("2d");
 
-  // ❌ NO MIRROR TRANSFORM (FIXED)
   ctx.drawImage(video,0,0);
 
   flashEffect();
@@ -230,6 +275,7 @@ async function startBooth(){
   for(let i=0;i<3;i++){
     await timer();
     capture();
+    await new Promise(r=>setTimeout(r,400));
   }
 }
 
@@ -248,27 +294,43 @@ function addSticker(src){
   currentPhoto.appendChild(s);
 }
 
-/* DRAG */
+/* DRAG FIX (FULL MOBILE + PC) */
 function drag(el){
-  let drag=false,x=0,y=0;
 
-  el.addEventListener("mousedown",e=>{
-    drag=true;
-    x=e.offsetX;
-    y=e.offsetY;
-  });
+  let dragging=false,ox=0,oy=0;
 
-  document.addEventListener("mousemove",e=>{
-    if(!drag) return;
-    const p=el.parentElement.getBoundingClientRect();
-    el.style.left=(e.clientX-p.left-x)+"px";
-    el.style.top=(e.clientY-p.top-y)+"px";
-  });
+  const start=(e)=>{
+    dragging=true;
+    const p=e.touches?e.touches[0]:e;
+    ox=p.clientX-el.offsetLeft;
+    oy=p.clientY-el.offsetTop;
+  };
 
-  document.addEventListener("mouseup",()=>drag=false);
+  const move=(e)=>{
+    if(!dragging) return;
+
+    const p=e.touches?e.touches[0]:e;
+    const box=el.parentElement.getBoundingClientRect();
+
+    el.style.left=(p.clientX-box.left-ox)+"px";
+    el.style.top=(p.clientY-box.top-oy)+"px";
+
+    e.preventDefault();
+  };
+
+  const end=()=>dragging=false;
+
+  el.addEventListener("mousedown",start);
+  el.addEventListener("touchstart",start);
+
+  document.addEventListener("mousemove",move);
+  document.addEventListener("touchmove",move,{passive:false});
+
+  document.addEventListener("mouseup",end);
+  document.addEventListener("touchend",end);
 }
 
-/* DOWNLOAD */
+/* DOWNLOAD (FIXED BASIC BUT STABLE) */
 function downloadStrip(){
 
   const photos=document.querySelectorAll(".photo");
@@ -276,23 +338,21 @@ function downloadStrip(){
   const c=document.createElement("canvas");
   const ctx=c.getContext("2d");
 
-  c.width=1080;
-  c.height=1920;
+  c.width=250;
+  c.height=photos.length*180;
 
-  ctx.fillStyle="white";
-  ctx.fillRect(0,0,c.width,c.height);
-
-  let y=50;
+  let y=0;
 
   photos.forEach(p=>{
     const img=p.querySelector("img");
-    ctx.drawImage(img,100,y,880,600);
-    y+=620;
+    ctx.drawImage(img,20,y,200,150);
+    y+=180;
   });
 
   const a=document.createElement("a");
   a.download="meowcam.png";
-  a.href=c.toDataURL("image/png");
+  a.href=c.toDataURL();
+
   a.click();
 }
 
