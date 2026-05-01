@@ -42,7 +42,7 @@ body{
   object-fit:cover;
 }
 
-/* CAMERA VIDEO (YOUR ORIGINAL EXACT SETTINGS — UNTOUCHED) */
+/* CAMERA VIDEO */
 #video{
   position:absolute;
   top:50%;
@@ -54,7 +54,7 @@ body{
   object-fit:cover;
 }
 
-/* CLICK BUTTON */
+/* BUTTON */
 .main-btn{
   position:absolute;
   bottom:20px;
@@ -95,7 +95,7 @@ body{
   100%{opacity:0;}
 }
 
-/* SIDE */
+/* SIDE LAYOUT FIXED */
 .side{
   text-align:center;
   max-height:90vh;
@@ -103,9 +103,10 @@ body{
   display:flex;
   flex-direction:column;
   align-items:center;
+  gap:10px;
 }
 
-/* STRIP */
+/* STRIP (FIXED FIRST) */
 #strip{
   background:white;
   padding:10px;
@@ -113,6 +114,7 @@ body{
   width:220px;
   min-height:250px;
   box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  z-index:2;
 }
 
 /* PHOTO */
@@ -127,18 +129,8 @@ body{
   border-radius:10px;
 }
 
-/* STICKER */
-.sticker{
-  position:absolute;
-  width:55px;
-  z-index:9999;
-  touch-action:none;
-  user-select:none;
-}
-
-/* PANEL */
+/* STICKERS (RIGHT SIDE AREA, BELOW STRIP) */
 .sticker-panel{
-  margin-top:10px;
   background:white;
   padding:10px;
   border-radius:15px;
@@ -146,6 +138,8 @@ body{
   flex-wrap:wrap;
   gap:5px;
   justify-content:center;
+  width:220px;
+  z-index:1;
 }
 
 .sticker-panel img{
@@ -153,22 +147,24 @@ body{
   cursor:pointer;
 }
 
-/* ✅ FIXED FILTERS (ONLY CHANGE — NOW PROPERLY BELOW VIDEO) */
-.filters{
+/* STICKER */
+.sticker{
   position:absolute;
-  top: calc(50% + 190px); /* aligns under your 295px camera */
-  left:50%;
-  transform:translateX(-50%);
-  display:flex;
-  flex-direction:row;
-  gap:6px;
-  background:rgba(255,255,255,0.85);
-  padding:6px 8px;
-  border-radius:12px;
-  z-index:1000;
+  width:55px;
+  z-index:9999;
 }
 
-/* BUTTONS */
+/* FILTERS */
+.filters{
+  margin-top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  align-items:center;
+  width:100%;
+}
+
+/* BUTTON */
 button{
   margin-top:10px;
   padding:8px 12px;
@@ -179,14 +175,15 @@ button{
   cursor:pointer;
 }
 
-/* CREDIT */
+/* CREDIT (BELOW EVERYTHING) */
 .credit{
-  margin-top:12px;
+  margin-top:5px;
   font-size:12px;
   background:white;
   padding:8px;
   border-radius:10px;
   box-shadow:0 5px 15px rgba(0,0,0,0.1);
+  width:220px;
 }
 </style>
 </head>
@@ -210,15 +207,6 @@ button{
 
 <button class="main-btn" onclick="startBooth()"></button>
 
-<!-- FILTERS (NOW CORRECTLY BELOW CAMERA) -->
-<div class="filters">
-<button onclick="setFilter('none')">Normal</button>
-<button onclick="setFilter('contrast(1.2)')">Bright</button>
-<button onclick="setFilter('sepia(1)')">Vintage</button>
-<button onclick="setFilter('grayscale(1)')">B&W</button>
-<button onclick="setFilter('brightness(1.3)')">Glow</button>
-</div>
-
 </div>
 
 <!-- SIDE -->
@@ -226,6 +214,7 @@ button{
 
 <div id="strip"></div>
 
+<!-- STICKERS (NOW RIGHT SIDE OF STRIP LOGICALLY) -->
 <div class="sticker-panel">
 <img src="2.jpg" onclick="addSticker(this.src)">
 <img src="3.png" onclick="addSticker(this.src)">
@@ -233,6 +222,14 @@ button{
 <img src="6.png" onclick="addSticker(this.src)">
 <img src="7.png" onclick="addSticker(this.src)">
 <img src="8.png" onclick="addSticker(this.src)">
+</div>
+
+<div class="filters">
+<button onclick="setFilter('none')">Normal</button>
+<button onclick="setFilter('contrast(1.2)')">Bright</button>
+<button onclick="setFilter('sepia(1)')">Vintage</button>
+<button onclick="setFilter('grayscale(1)')">B&W</button>
+<button onclick="setFilter('brightness(1.3)')">Glow</button>
 </div>
 
 <button onclick="downloadStrip()">DOWNLOAD 💾</button>
@@ -286,6 +283,7 @@ function flashEffect(){
 function capture(){
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
+
   const ctx=canvas.getContext("2d");
 
   ctx.filter=currentFilter;
@@ -328,43 +326,7 @@ function addSticker(src){
   s.style.left="40px";
   s.style.top="40px";
 
-  drag(s);
   currentPhoto.appendChild(s);
-}
-
-/* DRAG */
-function drag(el){
-
-  let dragging=false,ox=0,oy=0;
-
-  const start=(e)=>{
-    dragging=true;
-    const p=e.touches?e.touches[0]:e;
-    ox=p.clientX-el.offsetLeft;
-    oy=p.clientY-el.offsetTop;
-  };
-
-  const move=(e)=>{
-    if(!dragging) return;
-
-    const p=e.touches?e.touches[0]:e;
-    const box=el.parentElement.getBoundingClientRect();
-
-    el.style.left=(p.clientX-box.left-ox)+"px";
-    el.style.top=(p.clientY-box.top-oy)+"px";
-
-    e.preventDefault();
-  };
-
-  const end=()=>dragging=false;
-
-  document.addEventListener("mousemove",move);
-  document.addEventListener("mouseup",end);
-  document.addEventListener("touchmove",move,{passive:false});
-  document.addEventListener("touchend",end);
-
-  el.addEventListener("mousedown",start);
-  el.addEventListener("touchstart",start);
 }
 
 /* DOWNLOAD */
