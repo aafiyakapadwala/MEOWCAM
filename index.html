@@ -46,13 +46,13 @@ body{
 /* CAMERA VIDEO (MIRRORED + FITTED) */
 #video{
   position:absolute;
-  top:190px;
-  left:40px;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%) rotateY(180deg);
   width:270px;
   height:270px;
   border-radius:15px;
   object-fit:cover;
-  transform: rotateY(180deg);
 }
 
 /* CLICK BUTTON (YOUR ORIGINAL) */
@@ -154,21 +154,22 @@ body{
 
 /* FILTERS */
 .filters{
-  margin-top:10px;
+  position:absolute;
+  top:430px;   /* BELOW CAMERA AREA */
+  left:50%;
+  transform:translateX(-50%);
   display:flex;
-  flex-wrap:wrap;
-  gap:5px;
+  flex-direction:row;
+  gap:6px;
   justify-content:center;
+  flex-wrap:wrap;
+  width:260px;
 }
 
 .filters button{
-  padding:5px 8px;
-  border:none;
+  padding:6px 10px;
   border-radius:8px;
-  background:#ff8fab;
-  color:white;
-  cursor:pointer;
-  font-size:12px;
+  font-size:11px;
 }
 
 /* DOWNLOAD BUTTON */
