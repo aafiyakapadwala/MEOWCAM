@@ -14,7 +14,7 @@ body{
   justify-content:center;
   align-items:center;
   min-height:100vh;
-  overflow:auto;
+  overflow:auto; /* ✅ SCROLL FIX */
 }
 
 /* WRAPPER */
@@ -23,6 +23,7 @@ body{
   gap:15px;
   flex-wrap:wrap;
   justify-content:center;
+  padding:20px;
 }
 
 /* CAMERA */
@@ -34,7 +35,7 @@ body{
   overflow:hidden;
 }
 
-/* BG */
+/* VIDEO */
 .bg-video{
   position:absolute;
   width:100%;
@@ -42,7 +43,6 @@ body{
   object-fit:cover;
 }
 
-/* VIDEO */
 #video{
   position:absolute;
   top:140px;
@@ -54,17 +54,17 @@ body{
   object-fit:cover;
 }
 
-/* CLICK */
+/* YOUR BUTTON */
 .main-btn{
   position:absolute;
   bottom:20px;
   left:50%;
   transform:translateX(-50%);
-  width:85px;
-  height:85px;
+  width:90px;
+  height:90px;
+  background:transparent;
   border:none;
-  border-radius:50%;
-  background:#ff8fab;
+  cursor:pointer;
 }
 
 /* COUNTDOWN */
@@ -76,7 +76,7 @@ body{
   font-size:45px;
   color:#ff2e6d;
   font-weight:bold;
-  z-index:100;
+  z-index:1000;
 }
 
 /* FLASH */
@@ -103,29 +103,28 @@ body{
   min-height:250px;
   max-height:500px;
   overflow-y:auto;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
-/* PHOTO FRAME */
+/* PHOTO */
 .photo{
   position:relative;
   width:200px;
   margin:10px auto;
-  overflow:hidden;
 }
 
 .photo img{
   width:100%;
   border-radius:10px;
-  display:block;
 }
 
-/* STICKER FIXED INSIDE PHOTO */
+/* STICKER */
 .sticker{
   position:absolute;
-  width:40px;
-  z-index:999;
-  user-select:none;
+  width:45px;
+  z-index:9999;
   touch-action:none;
+  user-select:none;
 }
 
 /* PANEL */
@@ -142,6 +141,7 @@ body{
 
 .sticker-panel img{
   width:35px;
+  cursor:pointer;
 }
 
 /* BUTTON */
@@ -152,6 +152,23 @@ button{
   border-radius:10px;
   background:#ff8fab;
   color:white;
+}
+
+/* GLITTER ✨ */
+.glitter{
+  position:fixed;
+  width:6px;
+  height:6px;
+  background:white;
+  border-radius:50%;
+  pointer-events:none;
+  animation:fall 2s linear forwards;
+  z-index:9999;
+}
+
+@keyframes fall{
+  0%{transform:translateY(-10vh);opacity:1;}
+  100%{transform:translateY(100vh);opacity:0;}
 }
 
 /* MOBILE */
@@ -233,6 +250,20 @@ async function timer(){
 function flashEffect(){
   flash.classList.add("active");
   setTimeout(()=>flash.classList.remove("active"),300);
+  spawnGlitter(); // ✨ glitter on click
+}
+
+/* GLITTER EFFECT */
+function spawnGlitter(){
+  for(let i=0;i<25;i++){
+    const g=document.createElement("div");
+    g.className="glitter";
+    g.style.left=Math.random()*window.innerWidth+"px";
+    g.style.top="-10px";
+    document.body.appendChild(g);
+
+    setTimeout(()=>g.remove(),2000);
+  }
 }
 
 /* CAPTURE */
@@ -268,9 +299,8 @@ async function startBooth(){
   }
 }
 
-/* STICKER FIXED INSIDE PHOTO */
+/* STICKER */
 function addSticker(src){
-
   if(!currentPhoto) return;
 
   const s=document.createElement("img");
@@ -280,13 +310,12 @@ function addSticker(src){
   s.style.left="50px";
   s.style.top="50px";
 
-  enableDrag(s,currentPhoto);
-
+  drag(s);
   currentPhoto.appendChild(s);
 }
 
-/* DRAG FIX (100% WORKING MOBILE + PC) */
-function enableDrag(el,parent){
+/* DRAG */
+function drag(el){
 
   let dragging=false,ox=0,oy=0;
 
@@ -296,11 +325,8 @@ function enableDrag(el,parent){
   function start(e){
     dragging=true;
     const p=e.touches?e.touches[0]:e;
-
-    const rect=el.getBoundingClientRect();
-
-    ox=p.clientX-rect.left;
-    oy=p.clientY-rect.top;
+    ox=p.clientX-el.offsetLeft;
+    oy=p.clientY-el.offsetTop;
   }
 
   document.addEventListener("mousemove",move);
@@ -310,13 +336,10 @@ function enableDrag(el,parent){
     if(!dragging) return;
 
     const p=e.touches?e.touches[0]:e;
-    const box=parent.getBoundingClientRect();
+    const box=el.parentElement.getBoundingClientRect();
 
-    let x=p.clientX-box.left-ox;
-    let y=p.clientY-box.top-oy;
-
-    el.style.left=x+"px";
-    el.style.top=y+"px";
+    el.style.left=(p.clientX-box.left-ox)+"px";
+    el.style.top=(p.clientY-box.top-oy)+"px";
 
     e.preventDefault();
   }
@@ -325,7 +348,7 @@ function enableDrag(el,parent){
   document.addEventListener("touchend",()=>dragging=false);
 }
 
-/* DOWNLOAD FIX */
+/* 📸 DOWNLOAD (1080PX QUALITY FIX) */
 function downloadStrip(){
 
   const photos=document.querySelectorAll(".photo");
@@ -333,23 +356,24 @@ function downloadStrip(){
   const c=document.createElement("canvas");
   const ctx=c.getContext("2d");
 
-  c.width=250;
-  c.height=photos.length*180;
+  const scale=1080/220; // upscale factor
+
+  c.width=1080;
+  c.height=photos.length*800;
 
   let y=0;
 
   photos.forEach(p=>{
-
     const img=p.querySelector("img");
-    ctx.drawImage(img,20,y,200,150);
 
-    y+=180;
+    ctx.drawImage(img,0,y,1080,800);
+
+    y+=800;
   });
 
   const a=document.createElement("a");
-  a.download="meowcam.png";
+  a.download="meowcam-1080.png";
   a.href=c.toDataURL("image/png");
-
   a.click();
 }
 
