@@ -42,8 +42,7 @@ body{
   object-fit:cover;
 }
 
-
-/* CAMERA VIDEO (MIRRORED + FITTED) */
+/* CAMERA VIDEO */
 #video{
   position:absolute;
   top:50%;
@@ -55,7 +54,7 @@ body{
   object-fit:cover;
 }
 
-/* CLICK BUTTON (YOUR ORIGINAL) */
+/* CLICK BUTTON */
 .main-btn{
   position:absolute;
   bottom:20px;
@@ -87,7 +86,6 @@ body{
   inset:0;
   background:white;
   opacity:0;
-  pointer-events:none;
 }
 .flash.active{
   animation:flash .3s;
@@ -102,6 +100,9 @@ body{
   text-align:center;
   max-height:90vh;
   overflow:auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
 
 /* STRIP */
@@ -153,7 +154,6 @@ body{
 }
 
 /* FILTERS */
-
 .filters{
   margin-top:10px;
   display:flex;
@@ -162,15 +162,8 @@ body{
   align-items:center;
   width:100%;
 }
-  .side{
-  text-align:center;
-  max-height:90vh;
-  overflow:auto;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
-/* DOWNLOAD BUTTON */
+
+/* BUTTON */
 button{
   margin-top:10px;
   padding:8px 12px;
@@ -181,7 +174,7 @@ button{
   cursor:pointer;
 }
 
-/* FOOTER CREDIT */
+/* CREDIT */
 .credit{
   margin-top:12px;
   font-size:12px;
@@ -189,15 +182,6 @@ button{
   padding:8px;
   border-radius:10px;
   box-shadow:0 5px 15px rgba(0,0,0,0.1);
-}
-  .camera-mask{
-  position:absolute;
-  inset:0;
-  background-image:url("https://i.imgur.com/9XGQk3m.png"); /* cute frame overlay */
-  background-size:cover;
-  background-position:center;
-  pointer-events:none;
-  z-index:999;
 }
 </style>
 </head>
@@ -219,11 +203,9 @@ button{
 <div id="countdown"></div>
 <div class="flash" id="flash"></div>
 
-
 <button class="main-btn" onclick="startBooth()"></button>
 
 </div>
-  <div class="camera-mask"></div>
 
 <!-- SIDE -->
 <div class="side">
@@ -250,9 +232,8 @@ button{
 
 <button onclick="downloadStrip()">DOWNLOAD 💾</button>
 
-<!-- CREDIT BOX -->
 <div class="credit">
-By <b>Aafiya Kapadwala</b><br>
+By <b>Aafiya Kapadwala</b>
 </div>
 
 </div>
@@ -304,7 +285,7 @@ function capture(){
 
   ctx.filter=currentFilter;
   ctx.translate(canvas.width,0);
-  ctx.scale(-1,1); // mirror save too
+  ctx.scale(-1,1);
   ctx.drawImage(video,0,0);
 
   flashEffect();
