@@ -34,7 +34,7 @@ body{
   overflow:hidden;
 }
 
-/* BG */
+/* BACKGROUND */
 .bg-video{
   position:absolute;
   width:100%;
@@ -42,7 +42,7 @@ body{
   object-fit:cover;
 }
 
-/* VIDEO */
+/* CAMERA */
 #video{
   position:absolute;
   top:160px;
@@ -113,10 +113,20 @@ body{
 .photo{
   position:relative;
   margin-bottom:10px;
-}
-.photo img{
   width:160px;
+  height:150px;
+  overflow:visible;
+}
+
+/* IMAGE */
+.photo img{
+  width:100%;
+  height:100%;
   border-radius:10px;
+  position:absolute;
+  top:0;
+  left:0;
+  z-index:1;
 }
 
 /* STICKER */
@@ -125,6 +135,7 @@ body{
   width:45px;
   touch-action:none;
   cursor:grab;
+  z-index:9999;
 }
 
 /* PANEL */
@@ -143,7 +154,7 @@ body{
   width:40px;
 }
 
-/* BUTTON */
+/* BUTTONS */
 button{
   margin-top:10px;
   padding:8px;
@@ -151,6 +162,7 @@ button{
   border-radius:10px;
   background:#ff8fab;
   color:white;
+  cursor:pointer;
 }
 
 /* POPUP */
@@ -170,10 +182,68 @@ button{
   text-align:center;
 }
 
-@media(max-width:768px){
+/* 📱 MOBILE FIX */
+@media (max-width: 768px){
+
+  body{
+    flex-direction:column;
+    padding:10px;
+  }
+
   .wrapper{
     flex-direction:column;
     align-items:center;
+  }
+
+  .container{
+    width:95vw;
+    max-width:340px;
+    height:520px;
+  }
+
+  #video{
+    width:80%;
+    height:260px;
+    left:50%;
+    transform:translateX(-50%);
+    top:140px;
+  }
+
+  #countdown{
+    font-size:38px;
+  }
+
+  .side{
+    width:95vw;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  #strip{
+    width:90%;
+  }
+
+  /* 🔥 BIG MOBILE BUTTONS */
+  button{
+    font-size:18px;
+    padding:14px 18px;
+    border-radius:14px;
+    width:90%;
+    max-width:260px;
+  }
+
+  .sticker-panel{
+    width:90%;
+  }
+
+  .sticker-panel img{
+    width:55px;
+  }
+
+  .main-btn{
+    width:110px;
+    height:110px;
   }
 }
 </style>
@@ -221,9 +291,9 @@ button{
 </div>
 
 <!-- POPUP -->
-<div class="popup" id="popup">
+<div id="popup" class="popup">
   <div class="popup-box">
-    <h2>Your Strip 💖</h2>
+    <h2>💖 Your Strip is Ready</h2>
     <div id="preview"></div>
     <button onclick="closePopup()">Close</button>
   </div>
@@ -246,12 +316,10 @@ navigator.mediaDevices.getUserMedia({video:true})
 /* TIMER */
 async function timer(){
   const steps=["Ready...","Set...","Paws 🐾"];
-
   for(let t of steps){
     countdown.innerText=t;
     await new Promise(r=>setTimeout(r,700));
   }
-
   countdown.innerText="";
 }
 
@@ -301,14 +369,14 @@ function addSticker(src){
   s.src=src;
   s.className="sticker";
 
-  s.style.left="30px";
-  s.style.top="30px";
+  s.style.left="40px";
+  s.style.top="40px";
 
   drag(s);
   currentPhoto.appendChild(s);
 }
 
-/* MOBILE + PC DRAG FIX */
+/* DRAG FIX */
 function drag(el){
 
   let dx=0,dy=0,drag=false;
@@ -321,7 +389,9 @@ function drag(el){
 
   document.addEventListener("mousemove",e=>{
     if(!drag) return;
+
     const r=el.parentElement.getBoundingClientRect();
+
     el.style.left=(e.clientX-r.left-dx)+"px";
     el.style.top=(e.clientY-r.top-dy)+"px";
   });
@@ -332,14 +402,16 @@ function drag(el){
   el.addEventListener("touchstart",e=>{
     drag=true;
     const t=e.touches[0];
-    dx=t.clientX-el.offsetLeft;
-    dy=t.clientY-el.offsetTop;
+    dx=t.clientX - el.offsetLeft;
+    dy=t.clientY - el.offsetTop;
   });
 
   document.addEventListener("touchmove",e=>{
     if(!drag) return;
+
     const t=e.touches[0];
     const r=el.parentElement.getBoundingClientRect();
+
     el.style.left=(t.clientX-r.left-dx)+"px";
     el.style.top=(t.clientY-r.top-dy)+"px";
   });
@@ -347,7 +419,7 @@ function drag(el){
   document.addEventListener("touchend",()=>drag=false);
 }
 
-/* DONE → POPUP + RESET */
+/* DONE */
 function done(){
   document.getElementById("preview").innerHTML=strip.innerHTML;
   document.getElementById("popup").style.display="flex";
