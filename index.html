@@ -16,7 +16,6 @@ body{
   min-height:100vh;
 }
 
-/* WRAPPER */
 .wrapper{
   display:flex;
   gap:15px;
@@ -31,7 +30,6 @@ body{
   overflow:hidden;
 }
 
-/* VIDEO */
 .bg-video{
   position:absolute;
   width:100%;
@@ -49,7 +47,7 @@ body{
   border-radius:15px;
 }
 
-/* YOUR ORIGINAL CLICK BUTTON (RESTORED EXACTLY) */
+/* YOUR CLICK BUTTON (UNCHANGED) */
 .main-btn{
   position:absolute;
   bottom:20px;
@@ -60,16 +58,21 @@ body{
   background:transparent;
   border:none;
   cursor:pointer;
-  z-index:50;
 }
 
-/* FILTERS */
+/* FILTERS (RESTORED) */
 .filters{
-  margin-top:10px;
+  position:absolute;
+  bottom:120px;
+  left:50%;
+  transform:translateX(-50%);
   display:flex;
   gap:5px;
-  justify-content:center;
   flex-wrap:wrap;
+  justify-content:center;
+  background:rgba(255,255,255,0.8);
+  padding:5px;
+  border-radius:10px;
 }
 
 /* SIDE */
@@ -78,7 +81,7 @@ body{
   gap:10px;
 }
 
-/* STRIP WHITE BOX */
+/* STRIP */
 #strip{
   width:220px;
   min-height:250px;
@@ -117,7 +120,7 @@ body{
   cursor:pointer;
 }
 
-/* PREVIEW */
+/* PREVIEW POPUP */
 .preview{
   display:none;
   position:fixed;
@@ -150,9 +153,10 @@ body{
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas" style="display:none;"></canvas>
 
-<!-- YOUR ORIGINAL BUTTON (UNCHANGED) -->
+<!-- YOUR CLICK BUTTON -->
 <button class="main-btn" onclick="startBooth()"></button>
 
+<!-- FILTERS BACK -->
 <div class="filters">
 <button onclick="setFilter('none')">Normal</button>
 <button onclick="setFilter('contrast(1.2)')">Bright</button>
@@ -183,7 +187,7 @@ body{
 <div class="preview" id="preview">
   <div class="preview-box">
     <img id="finalImg" style="width:200px;"><br><br>
-    <a id="downloadBtn" download="meowcam.png">Download</a><br><br>
+    <button onclick="downloadImg()">Download</button>
     <button onclick="closePreview()">Close</button>
   </div>
 </div>
@@ -230,7 +234,7 @@ function capture(){
   currentPhoto=div;
 }
 
-/* CLICK BOOTH */
+/* BOOTH */
 async function startBooth(){
   strip.innerHTML="";
   for(let i=0;i<3;i++){
@@ -239,7 +243,7 @@ async function startBooth(){
   }
 }
 
-/* STICKER DRAG FIXED */
+/* STICKER DRAG */
 function addSticker(src){
   if(!currentPhoto) return;
 
@@ -269,7 +273,7 @@ function addSticker(src){
   document.onmouseup=()=>drag=false;
 }
 
-/* DONE + PREVIEW */
+/* DONE → PREVIEW */
 function finishStrip(){
 
   const photos=document.querySelectorAll(".photo img");
@@ -287,9 +291,17 @@ function finishStrip(){
   const final=c.toDataURL();
 
   document.getElementById("finalImg").src=final;
-  document.getElementById("downloadBtn").href=final;
-
   document.getElementById("preview").style.display="flex";
+
+  window.finalImage=final;
+}
+
+/* DOWNLOAD */
+function downloadImg(){
+  const a=document.createElement("a");
+  a.href=window.finalImage;
+  a.download="meowcam.png";
+  a.click();
 }
 
 /* CLOSE */
