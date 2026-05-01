@@ -14,13 +14,12 @@ body{
   justify-content:center;
   align-items:center;
   min-height:100vh;
-  flex-wrap:wrap;
 }
 
 /* WRAPPER */
 .wrapper{
   display:flex;
-  gap:20px;
+  gap:15px;
   flex-wrap:wrap;
   justify-content:center;
 }
@@ -34,7 +33,6 @@ body{
   overflow:hidden;
 }
 
-/* BACKGROUND */
 .bg-video{
   position:absolute;
   width:100%;
@@ -42,13 +40,12 @@ body{
   object-fit:cover;
 }
 
-/* CAMERA */
 #video{
   position:absolute;
   top:160px;
-  left:25px;
-  width:270px;
-  height:270px;
+  left:35px;
+  width:250px;
+  height:250px;
   border-radius:15px;
   object-fit:cover;
 }
@@ -59,30 +56,29 @@ body{
   bottom:10px;
   left:50%;
   transform:translateX(-50%);
-  width:90px;
-  height:90px;
-  background:transparent;
+  width:80px;
+  height:80px;
   border:none;
+  border-radius:50%;
+  background:#ff8fab;
 }
 
 /* COUNTDOWN */
 #countdown{
   position:absolute;
-  top:260px;
+  top:250px;
   left:50%;
   transform:translate(-50%,-50%);
   font-size:45px;
   color:#ff2e6d;
   font-weight:bold;
-  text-shadow:0 0 10px white;
   z-index:100;
 }
 
 /* FLASH */
 .flash{
   position:absolute;
-  width:100%;
-  height:100%;
+  inset:0;
   background:white;
   opacity:0;
 }
@@ -104,38 +100,30 @@ body{
   background:white;
   padding:10px;
   border-radius:15px;
+  width:220px;
   min-height:250px;
-  width:200px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
 /* PHOTO */
 .photo{
   position:relative;
-  margin-bottom:10px;
-  width:160px;
-  height:150px;
-  overflow:visible;
+  width:200px;
+  margin:10px auto;
 }
 
-/* IMAGE */
 .photo img{
   width:100%;
-  height:100%;
   border-radius:10px;
-  position:absolute;
-  top:0;
-  left:0;
-  z-index:1;
+  display:block;
 }
 
-/* STICKER */
+/* STICKER FIX */
 .sticker{
   position:absolute;
-  width:45px;
+  width:40px;
+  z-index:999;
   touch-action:none;
-  cursor:grab;
-  z-index:9999;
+  user-select:none;
 }
 
 /* PANEL */
@@ -151,99 +139,33 @@ body{
 }
 
 .sticker-panel img{
-  width:40px;
+  width:35px;
+  cursor:pointer;
 }
 
-/* BUTTONS */
+/* BUTTON */
 button{
   margin-top:10px;
-  padding:8px;
+  padding:8px 12px;
   border:none;
   border-radius:10px;
   background:#ff8fab;
   color:white;
-  cursor:pointer;
 }
 
-/* POPUP */
-.popup{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.6);
-  display:none;
-  justify-content:center;
-  align-items:center;
-}
-
-.popup-box{
-  background:white;
-  padding:15px;
-  border-radius:15px;
-  text-align:center;
-}
-
-/* 📱 MOBILE FIX */
-@media (max-width: 768px){
-
-  body{
-    flex-direction:column;
-    padding:10px;
-  }
-
+/* MOBILE */
+@media(max-width:768px){
   .wrapper{
     flex-direction:column;
     align-items:center;
   }
 
-  .container{
-    width:95vw;
-    max-width:340px;
-    height:520px;
-  }
-
-  #video{
-    width:80%;
-    height:260px;
-    left:50%;
-    transform:translateX(-50%);
-    top:140px;
-  }
-
-  #countdown{
-    font-size:38px;
-  }
-
-  .side{
-    width:95vw;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-  }
-
   #strip{
-    width:90%;
+    width:260px;
   }
 
-  /* 🔥 BIG MOBILE BUTTONS */
-  button{
-    font-size:18px;
-    padding:14px 18px;
-    border-radius:14px;
-    width:90%;
-    max-width:260px;
-  }
-
-  .sticker-panel{
-    width:90%;
-  }
-
-  .sticker-panel img{
-    width:55px;
-  }
-
-  .main-btn{
-    width:110px;
-    height:110px;
+  .container{
+    transform:scale(0.95);
   }
 }
 </style>
@@ -284,19 +206,10 @@ button{
 <img src="8.png" onclick="addSticker(this.src)">
 </div>
 
-<button onclick="done()">DONE ✔</button>
 <button onclick="downloadStrip()">DOWNLOAD 💾</button>
 
 </div>
-</div>
 
-<!-- POPUP -->
-<div id="popup" class="popup">
-  <div class="popup-box">
-    <h2>💖 Your Strip is Ready</h2>
-    <div id="preview"></div>
-    <button onclick="closePopup()">Close</button>
-  </div>
 </div>
 
 <script>
@@ -333,8 +246,8 @@ function flashEffect(){
 function capture(){
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
-
   const ctx=canvas.getContext("2d");
+
   ctx.drawImage(video,0,0);
 
   flashEffect();
@@ -357,7 +270,7 @@ async function startBooth(){
   for(let i=0;i<3;i++){
     await timer();
     capture();
-    await new Promise(r=>setTimeout(r,500));
+    await new Promise(r=>setTimeout(r,400));
   }
 }
 
@@ -369,76 +282,54 @@ function addSticker(src){
   s.src=src;
   s.className="sticker";
 
-  s.style.left="40px";
-  s.style.top="40px";
+  s.style.left="50px";
+  s.style.top="50px";
 
   drag(s);
   currentPhoto.appendChild(s);
 }
 
-/* DRAG FIX */
+/* DRAG FIX (MOBILE + PC) */
 function drag(el){
 
-  let dx=0,dy=0,drag=false;
+  let dragging=false,ox=0,oy=0;
 
-  el.addEventListener("mousedown",e=>{
-    drag=true;
-    dx=e.offsetX;
-    dy=e.offsetY;
-  });
+  el.addEventListener("mousedown",start);
+  el.addEventListener("touchstart",start);
 
-  document.addEventListener("mousemove",e=>{
-    if(!drag) return;
+  function start(e){
+    dragging=true;
+    const p=e.touches?e.touches[0]:e;
+    ox=p.clientX-el.offsetLeft;
+    oy=p.clientY-el.offsetTop;
+  }
 
-    const r=el.parentElement.getBoundingClientRect();
+  document.addEventListener("mousemove",move);
+  document.addEventListener("touchmove",move,{passive:false});
 
-    el.style.left=(e.clientX-r.left-dx)+"px";
-    el.style.top=(e.clientY-r.top-dy)+"px";
-  });
+  function move(e){
+    if(!dragging) return;
 
-  document.addEventListener("mouseup",()=>drag=false);
+    const p=e.touches?e.touches[0]:e;
+    const box=el.parentElement.getBoundingClientRect();
 
-  /* MOBILE */
-  el.addEventListener("touchstart",e=>{
-    drag=true;
-    const t=e.touches[0];
-    dx=t.clientX - el.offsetLeft;
-    dy=t.clientY - el.offsetTop;
-  });
+    let x=p.clientX-box.left-ox;
+    let y=p.clientY-box.top-oy;
 
-  document.addEventListener("touchmove",e=>{
-    if(!drag) return;
+    el.style.left=x+"px";
+    el.style.top=y+"px";
 
-    const t=e.touches[0];
-    const r=el.parentElement.getBoundingClientRect();
+    e.preventDefault();
+  }
 
-    el.style.left=(t.clientX-r.left-dx)+"px";
-    el.style.top=(t.clientY-r.top-dy)+"px";
-  });
-
-  document.addEventListener("touchend",()=>drag=false);
-}
-
-/* DONE */
-function done(){
-  document.getElementById("preview").innerHTML=strip.innerHTML;
-  document.getElementById("popup").style.display="flex";
-
-  setTimeout(()=>{
-    strip.innerHTML="";
-    currentPhoto=null;
-  },500);
-}
-
-function closePopup(){
-  document.getElementById("popup").style.display="none";
+  document.addEventListener("mouseup",()=>dragging=false);
+  document.addEventListener("touchend",()=>dragging=false);
 }
 
 /* DOWNLOAD */
 function downloadStrip(){
 
   const photos=document.querySelectorAll(".photo");
-  if(!photos.length) return;
 
   const c=document.createElement("canvas");
   const ctx=c.getContext("2d");
@@ -454,10 +345,11 @@ function downloadStrip(){
     y+=180;
   });
 
-  const link=document.createElement("a");
-  link.download="meowcam.png";
-  link.href=c.toDataURL("image/png");
-  link.click();
+  const a=document.createElement("a");
+  a.download="meowcam.png";
+  a.href=c.toDataURL();
+
+  a.click();
 }
 
 </script>
