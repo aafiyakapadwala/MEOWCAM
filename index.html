@@ -51,17 +51,18 @@ body{
   object-fit:cover;
 }
 
-/* CLICK */
+/* YOUR ORIGINAL CLICK BUTTON (RESTORED) */
 .main-btn{
   position:absolute;
   bottom:20px;
   left:50%;
   transform:translateX(-50%);
-  width:85px;
-  height:85px;
+  width:100px;
+  height:100px;
+  background:transparent; /* IMPORTANT: no pink */
   border:none;
-  border-radius:50%;
-  background:#ff8fab;
+  cursor:pointer;
+  z-index:50;
 }
 
 /* STRIP */
@@ -94,7 +95,7 @@ body{
   touch-action:none;
 }
 
-/* PANEL */
+/* STICKER PANEL */
 .sticker-panel{
   margin-top:10px;
   background:white;
@@ -108,6 +109,7 @@ body{
 
 .sticker-panel img{
   width:35px;
+  cursor:pointer;
 }
 
 /* BUTTONS */
@@ -166,6 +168,7 @@ canvas{
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas" style="display:none;"></canvas>
 
+<!-- YOUR ORIGINAL CLICK BUTTON -->
 <button class="main-btn" onclick="startBooth()"></button>
 
 </div>
@@ -233,7 +236,7 @@ function capture(){
   currentPhoto=div;
 }
 
-/* SIMPLE BOOTH */
+/* BOOTH */
 async function startBooth(){
   strip.innerHTML="";
   for(let i=0;i<3;i++){
@@ -250,15 +253,16 @@ function addSticker(src){
   s.src=src;
   s.className="sticker";
 
-  s.style.left="40px";
-  s.style.top="40px";
+  s.style.left="50px";
+  s.style.top="50px";
 
   drag(s);
   currentPhoto.appendChild(s);
 }
 
-/* DRAG */
+/* DRAG FIX */
 function drag(el){
+
   let dx=0,dy=0,drag=false;
 
   el.addEventListener("mousedown",e=>{
@@ -269,8 +273,11 @@ function drag(el){
 
   document.addEventListener("mousemove",e=>{
     if(!drag) return;
-    el.style.left=(e.pageX-dx)+"px";
-    el.style.top=(e.pageY-dy)+"px";
+
+    const box=el.parentElement.getBoundingClientRect();
+
+    el.style.left=(e.pageX-box.left-dx)+"px";
+    el.style.top=(e.pageY-box.top-dy)+"px";
   });
 
   document.addEventListener("mouseup",()=>drag=false);
@@ -282,7 +289,7 @@ function resetStrip(){
   currentPhoto=null;
 }
 
-/* DONE → POPUP */
+/* DONE → 1080x270 EXPORT */
 function done(){
 
   const photos=document.querySelectorAll(".photo");
@@ -290,7 +297,6 @@ function done(){
   const c=document.getElementById("finalCanvas");
   const ctx=c.getContext("2d");
 
-  // 🔥 FINAL SIZE 1080 x 270
   c.width=1080;
   c.height=270;
 
@@ -304,7 +310,6 @@ function done(){
 
     ctx.drawImage(img,x,20,320,230);
 
-    // stickers
     p.querySelectorAll(".sticker").forEach(st=>{
       const sx=parseInt(st.style.left)||0;
       const sy=parseInt(st.style.top)||0;
