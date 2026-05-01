@@ -49,8 +49,8 @@ body{
   top:50%;
   left:50%;
   transform:translate(-50%, -50%) rotateY(180deg);
-  width:390px;
-  height:390px;
+  width:350px;
+  height:350px;
   border-radius:15px;
   object-fit:cover;
 }
@@ -129,7 +129,7 @@ body{
 /* STICKER */
 .sticker{
   position:absolute;
-  width:45px;
+  width:55px;
   z-index:9999;
   touch-action:none;
   user-select:none;
@@ -160,16 +160,16 @@ body{
   flex-direction:column;
   gap:8px;
   align-items:center;
+  width:100%;
 }
-
-.filters button{
-  width:140px;
-  padding:8px;
-  border-radius:12px;
-  font-size:12px;
-  background:linear-gradient(45deg,#ff8fab,#ffb3c6);
+  .side{
+  text-align:center;
+  max-height:90vh;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
-
 /* DOWNLOAD BUTTON */
 button{
   margin-top:10px;
