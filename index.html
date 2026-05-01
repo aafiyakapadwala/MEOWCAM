@@ -5,37 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MEOWCAM V2 🐱💖</title>
 
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <style>
 body{
   margin:0;
   font-family:"Comic Sans MS",cursive;
   background:linear-gradient(#ffd6e0,#fff0f5);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-  overflow:auto;
 }
 
-/* WRAPPER */
-.wrapper{
-  display:flex;
-  gap:15px;
-  flex-wrap:wrap;
-  justify-content:center;
-  align-items:flex-start;
-}
-
-/* CAMERA */
-.container{
+/* CAMERA BOX */
+.camera-box{
   position:relative;
-  width:350px;
-  height:700px;
+  width:100%;
+  max-width:350px;
+  height:600px;
   border-radius:20px;
   overflow:hidden;
 }
 
-/* BG */
+/* BG VIDEO */
 .bg-video{
   position:absolute;
   width:100%;
@@ -43,14 +33,14 @@ body{
   object-fit:cover;
 }
 
-/* CAMERA VIDEO */
+/* CAMERA */
 #video{
   position:absolute;
   top:50%;
   left:50%;
   transform:translate(-50%, -50%) rotateY(180deg);
-  width:290px;
-  height:295px;
+  width:85%;
+  height:45%;
   border-radius:15px;
   object-fit:cover;
 }
@@ -58,24 +48,24 @@ body{
 /* BUTTON */
 .main-btn{
   position:absolute;
-  bottom:20px;
+  bottom:15px;
   left:50%;
   transform:translateX(-50%);
-  width:90px;
-  height:90px;
-  background:transparent;
+  width:80px;
+  height:80px;
   border:none;
-  cursor:pointer;
+  border-radius:50%;
+  background:#ff4d88;
   z-index:50;
 }
 
 /* COUNTDOWN */
 #countdown{
   position:absolute;
-  top:220px;
+  top:45%;
   left:50%;
   transform:translate(-50%,-50%);
-  font-size:45px;
+  font-size:40px;
   color:#ff2e6d;
   font-weight:bold;
   z-index:1000;
@@ -96,47 +86,19 @@ body{
   100%{opacity:0;}
 }
 
-/* SIDE */
-.side{
-  display:flex;
-  flex-direction:row;
-  gap:10px;
-  align-items:flex-start;
-}
-
 /* STRIP */
 #strip{
   background:white;
   padding:10px;
   border-radius:15px;
-  width:220px;
-  height:400px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
-}
-
-/* STICKERS PANEL */
-.sticker-panel{
-  background:white;
-  padding:10px;
-  border-radius:15px;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  width:90px;
-}
-
-.sticker-panel img{
-  width:35px;
-  cursor:pointer;
+  min-height:300px;
 }
 
 /* PHOTO */
 .photo{
   position:relative;
-  width:200px;
-  margin:10px auto;
+  margin-bottom:10px;
 }
-
 .photo img{
   width:100%;
   border-radius:10px;
@@ -145,93 +107,92 @@ body{
 /* STICKER */
 .sticker{
   position:absolute;
-  width:55px;
-  z-index:9999;
+  width:60px;
+  z-index:999;
   touch-action:none;
-  user-select:none;
+  cursor:grab;
 }
 
-/* ✅ FIXED FILTERS (MOVED DOWN 100px CLEANLY) */
-.filters{
-  width:290px;
-  margin:110px auto 0 auto;
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:center;
-  gap:6px;
-  background:rgba(255,255,255,0.85);
-  padding:8px;
-  border-radius:12px;
+/* FILTERS */
+.filters button{
+  margin:3px;
 }
 
-/* BUTTON */
-button{
-  padding:8px 12px;
-  border:none;
-  border-radius:10px;
-  background:#ff8fab;
-  color:white;
+/* STICKER PANEL */
+.sticker-panel img{
+  width:45px;
   cursor:pointer;
 }
 
 /* CREDIT */
 .credit{
-  margin-top:10px;
   font-size:12px;
   background:white;
-  padding:8px;
+  padding:6px;
   border-radius:10px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.1);
-  text-align:center;
 }
 </style>
 </head>
 
 <body>
 
-<div class="wrapper">
+<div class="container-fluid py-3">
+  <div class="row justify-content-center">
 
-<!-- CAMERA -->
-<div class="container">
+    <!-- CAMERA -->
+    <div class="col-lg-4 col-md-6 col-12 d-flex justify-content-center mb-3">
+      <div class="camera-box">
 
-<video class="bg-video" autoplay muted loop>
-<source src="billu.mp4">
-</video>
+        <video class="bg-video" autoplay muted loop>
+          <source src="billu.mp4">
+        </video>
 
-<video id="video" autoplay playsinline></video>
-<canvas id="canvas" style="display:none;"></canvas>
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas" class="d-none"></canvas>
 
-<div id="countdown"></div>
-<div class="flash" id="flash"></div>
+        <div id="countdown"></div>
+        <div class="flash" id="flash"></div>
 
-<button class="main-btn" onclick="startBooth()"></button>
+        <button class="main-btn" onclick="startBooth()"></button>
 
-</div>
+      </div>
+    </div>
 
-<!-- SIDE -->
-<div class="side">
+    <!-- SIDE PANEL -->
+    <div class="col-lg-4 col-md-6 col-12">
 
-<div id="strip"></div>
+      <!-- STRIP -->
+      <div id="strip" class="mb-3"></div>
 
-<div class="sticker-panel">
-<img src="2.jpg" onclick="addSticker(this.src)">
-<img src="3.png" onclick="addSticker(this.src)">
-<img src="4.png" onclick="addSticker(this.src)">
-<img src="6.png" onclick="addSticker(this.src)">
-<img src="7.png" onclick="addSticker(this.src)">
-<img src="8.png" onclick="addSticker(this.src)">
-</div>
+      <!-- FILTERS -->
+      <div class="filters text-center mb-3">
+        <button class="btn btn-sm btn-danger" onclick="setFilter('none')">Normal</button>
+        <button class="btn btn-sm btn-danger" onclick="setFilter('contrast(1.2)')">Bright</button>
+        <button class="btn btn-sm btn-danger" onclick="setFilter('sepia(1)')">Vintage</button>
+        <button class="btn btn-sm btn-danger" onclick="setFilter('grayscale(1)')">B&W</button>
+        <button class="btn btn-sm btn-danger" onclick="setFilter('brightness(1.3)')">Glow</button>
+      </div>
 
-<div class="credit">
-By <b>Aafiya Kapadwala</b>
-</div>
+      <!-- STICKERS -->
+      <div class="sticker-panel d-flex flex-wrap gap-2 justify-content-center mb-3">
+        <img src="2.jpg" onclick="addSticker(this.src)">
+        <img src="3.png" onclick="addSticker(this.src)">
+        <img src="4.png" onclick="addSticker(this.src)">
+        <img src="6.png" onclick="addSticker(this.src)">
+        <img src="7.png" onclick="addSticker(this.src)">
+        <img src="8.png" onclick="addSticker(this.src)">
+      </div>
 
-</div>
+      <div class="credit text-center">
+        By <b>Aafiya Kapadwala</b>
+      </div>
 
+    </div>
+
+  </div>
 </div>
 
 <script>
-
 const video=document.getElementById("video");
 const canvas=document.getElementById("canvas");
 const strip=document.getElementById("strip");
@@ -303,32 +264,30 @@ async function startBooth(){
   }
 }
 
-/* STICKER */
+/* ADD STICKER */
 function addSticker(src){
   if(!currentPhoto) return;
 
   const s=document.createElement("img");
   s.src=src;
   s.className="sticker";
-
-  s.style.left="40px";
-  s.style.top="40px";
+  s.style.left="30px";
+  s.style.top="30px";
 
   drag(s);
   currentPhoto.appendChild(s);
 }
 
-/* FIXED DRAG (PHONE + LAPTOP) */
+/* DRAG FIX */
 function drag(el){
-  let dragging=false;
-  let ox=0, oy=0;
+  let dragging=false, ox=0, oy=0;
 
   function pos(e){
     return e.touches ? e.touches[0] : e;
   }
 
-  el.addEventListener("mousedown", start);
-  el.addEventListener("touchstart", start);
+  el.addEventListener("mousedown",start);
+  el.addEventListener("touchstart",start);
 
   function start(e){
     dragging=true;
@@ -338,8 +297,8 @@ function drag(el){
     e.preventDefault();
   }
 
-  document.addEventListener("mousemove", move);
-  document.addEventListener("touchmove", move, {passive:false});
+  document.addEventListener("mousemove",move);
+  document.addEventListener("touchmove",move,{passive:false});
 
   function move(e){
     if(!dragging) return;
@@ -353,10 +312,9 @@ function drag(el){
     e.preventDefault();
   }
 
-  document.addEventListener("mouseup", ()=>dragging=false);
-  document.addEventListener("touchend", ()=>dragging=false);
+  document.addEventListener("mouseup",()=>dragging=false);
+  document.addEventListener("touchend",()=>dragging=false);
 }
-
 </script>
 
 </body>
