@@ -33,7 +33,7 @@ body{
   background:black;
 }
 
-/* BACKGROUND */
+/* BG */
 .bg-video{
   position:absolute;
   width:100%;
@@ -41,12 +41,12 @@ body{
   object-fit:cover;
 }
 
-/* CAMERA VIDEO (❌ NO MIRROR FIX) */
+/* 🔥 MIRROR FIX (SELFIE MODE) */
 #video{
   position:absolute;
   top:140px;
   left:50%;
-  transform:translateX(-50%); /* ONLY CENTER, NO FLIP */
+  transform:translateX(-50%) scaleX(-1);
   width:240px;
   height:240px;
   border-radius:15px;
@@ -54,7 +54,7 @@ body{
   z-index:2;
 }
 
-/* CLICK BUTTON */
+/* BUTTON */
 button{
   margin-top:10px;
   padding:8px 12px;
@@ -63,8 +63,6 @@ button{
   background:#ff8fab;
   color:white;
   cursor:pointer;
-  z-index:999;
-  position:relative;
 }
 
 /* COUNTDOWN */
@@ -85,7 +83,6 @@ button{
   inset:0;
   background:white;
   opacity:0;
-  pointer-events:none;
 }
 .flash.active{
   animation:flash .3s;
@@ -116,19 +113,12 @@ button{
   border-radius:10px;
 }
 
-/* STICKERS */
+/* STICKER */
 .sticker{
   position:absolute;
   width:45px;
   z-index:9999;
   touch-action:none;
-  user-select:none;
-}
-
-/* PANEL */
-.sticker-panel img{
-  width:35px;
-  cursor:pointer;
 }
 </style>
 </head>
@@ -144,9 +134,7 @@ button{
 <source src="billu.mp4">
 </video>
 
-<!-- ❌ FIX: no mirror transform applied -->
 <video id="video" autoplay playsinline></video>
-
 <canvas id="canvas" style="display:none;"></canvas>
 
 <div id="countdown"></div>
@@ -161,11 +149,10 @@ button{
 
 <div id="strip"></div>
 
-<div class="sticker-panel">
-<img src="2.jpg" onclick="addSticker(this.src)">
-<img src="3.png" onclick="addSticker(this.src)">
-<img src="4.png" onclick="addSticker(this.src)">
-<img src="6.png" onclick="addSticker(this.src)">
+<div>
+<img src="2.jpg" width="40" onclick="addSticker(this.src)">
+<img src="3.png" width="40" onclick="addSticker(this.src)">
+<img src="4.png" width="40" onclick="addSticker(this.src)">
 </div>
 
 <button onclick="downloadStrip()">DOWNLOAD 💾</button>
@@ -184,7 +171,7 @@ const flash=document.getElementById("flash");
 
 let currentPhoto=null;
 
-/* CAMERA FIX */
+/* CAMERA */
 navigator.mediaDevices.getUserMedia({video:true})
 .then(stream=>{
   video.srcObject=stream;
@@ -205,17 +192,20 @@ function flashEffect(){
   setTimeout(()=>flash.classList.remove("active"),300);
 }
 
-/* CAPTURE (FIXED CLICK ISSUE) */
+/* 🔥 CLICK FIX (SAFE CAPTURE) */
 function capture(){
 
-  if(!video.videoWidth) return; // IMPORTANT FIX
+  if(!video.videoWidth) return;
 
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
 
   const ctx=canvas.getContext("2d");
 
-  // ❌ NO MIRROR
+  // mirror fix for final image (IMPORTANT)
+  ctx.translate(canvas.width,0);
+  ctx.scale(-1,1);
+
   ctx.drawImage(video,0,0);
 
   flashEffect();
@@ -235,7 +225,6 @@ function capture(){
 /* BOOTH */
 async function startBooth(){
   strip.innerHTML="";
-
   for(let i=0;i<3;i++){
     await timer();
     capture();
@@ -259,7 +248,6 @@ function addSticker(src){
 
 /* DRAG */
 function drag(el){
-
   let drag=false,x=0,y=0;
 
   el.addEventListener("mousedown",e=>{
