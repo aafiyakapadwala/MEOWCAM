@@ -14,9 +14,9 @@ body{
   justify-content:center;
   align-items:center;
   min-height:100vh;
-  overflow:auto;
 }
 
+/* WRAPPER */
 .wrapper{
   display:flex;
   gap:15px;
@@ -34,6 +34,7 @@ body{
   overflow:hidden;
 }
 
+/* BG */
 .bg-video{
   position:absolute;
   width:100%;
@@ -64,7 +65,6 @@ body{
   background:transparent;
   border:none;
   cursor:pointer;
-  z-index:50;
 }
 
 /* COUNTDOWN */
@@ -76,7 +76,6 @@ body{
   font-size:45px;
   color:#ff2e6d;
   font-weight:bold;
-  z-index:1000;
 }
 
 /* FLASH */
@@ -86,8 +85,7 @@ body{
   background:white;
   opacity:0;
 }
-.flash.active{ animation:flash .3s; }
-
+.flash.active{animation:flash .3s;}
 @keyframes flash{
   0%{opacity:1;}
   100%{opacity:0;}
@@ -145,19 +143,19 @@ body{
   width:55px;
   z-index:9999;
   touch-action:none;
+  user-select:none;
 }
 
-/* ✅ FIX: FILTERS ALWAYS BELOW CAMERA */
+/* ✅ FIXED FILTERS (VISIBLE ALWAYS NOW) */
 .filters{
-  position:absolute;
-  top: 0px;   /* BELOW CAMERA AREA FIXED */
-  left:50%;
-  transform:translateX(-50%);
+  width:290px;
+  margin:10px auto 0 auto;
   display:flex;
-  flex-direction:row;
+  flex-wrap:wrap;
+  justify-content:center;
   gap:6px;
   background:rgba(255,255,255,0.85);
-  padding:6px;
+  padding:8px;
   border-radius:12px;
 }
 
@@ -178,6 +176,7 @@ button{
   background:white;
   padding:8px;
   border-radius:10px;
+  text-align:center;
 }
 </style>
 </head>
@@ -200,21 +199,25 @@ button{
 
 <button class="main-btn" onclick="startBooth()"></button>
 
-<!-- FILTERS FIXED BELOW CAMERA -->
-<div class="filters">
-<button onclick="setFilter('none')">Normal</button>
-<button onclick="setFilter('contrast(1.2)')">Bright</button>
-<button onclick="setFilter('sepia(1)')">Vintage</button>
-<button onclick="setFilter('grayscale(1)')">B&W</button>
-<button onclick="setFilter('brightness(1.3)')">Glow</button>
-</div>
-
 </div>
 
 <!-- SIDE -->
 <div class="side">
 
-<div id="strip"></div>
+<div>
+  <div id="strip"></div>
+
+  <!-- FILTERS NOW BELOW STRIP (VISIBLE ON ALL DEVICES) -->
+  <div class="filters">
+    <button onclick="setFilter('none')">Normal</button>
+    <button onclick="setFilter('contrast(1.2)')">Bright</button>
+    <button onclick="setFilter('sepia(1)')">Vintage</button>
+    <button onclick="setFilter('grayscale(1)')">B&W</button>
+    <button onclick="setFilter('brightness(1.3)')">Glow</button>
+  </div>
+
+  <div class="credit">By <b>Aafiya Kapadwala</b></div>
+</div>
 
 <div class="sticker-panel">
 <img src="2.jpg" onclick="addSticker(this.src)">
@@ -272,7 +275,6 @@ function capture(){
   canvas.height=video.videoHeight;
 
   const ctx=canvas.getContext("2d");
-
   ctx.filter=currentFilter;
   ctx.translate(canvas.width,0);
   ctx.scale(-1,1);
@@ -302,7 +304,7 @@ async function startBooth(){
   }
 }
 
-/* STICKER + DRAG FIX */
+/* STICKER DRAG FIX */
 function addSticker(src){
   if(!currentPhoto) return;
 
@@ -313,12 +315,11 @@ function addSticker(src){
   s.style.left="40px";
   s.style.top="40px";
 
-  makeDrag(s);
+  drag(s);
   currentPhoto.appendChild(s);
 }
 
-/* DRAG FIX */
-function makeDrag(el){
+function drag(el){
   let dragging=false,ox=0,oy=0;
 
   el.addEventListener("mousedown",start);
