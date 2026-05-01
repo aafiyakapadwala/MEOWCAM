@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MEOWCAM 🐱💖</title>
 
 <style>
@@ -12,20 +13,23 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  height:100vh;
+  min-height:100vh;
+  flex-wrap:wrap;
 }
 
-/* MAIN LAYOUT */
+/* WRAPPER */
 .wrapper{
   display:flex;
   gap:20px;
+  flex-wrap:wrap;
+  justify-content:center;
 }
 
-/* CAMERA BOX */
+/* CAMERA */
 .container{
   position:relative;
-  width:350px;
-  height:700px;
+  width:320px;
+  height:600px;
   border-radius:20px;
   overflow:hidden;
 }
@@ -38,11 +42,11 @@ body{
   object-fit:cover;
 }
 
-/* CAMERA */
+/* VIDEO */
 #video{
   position:absolute;
-  top:190px;
-  left:40px;
+  top:160px;
+  left:25px;
   width:270px;
   height:270px;
   border-radius:15px;
@@ -55,20 +59,19 @@ body{
   bottom:10px;
   left:50%;
   transform:translateX(-50%);
-  width:100px;
-  height:100px;
+  width:90px;
+  height:90px;
   background:transparent;
   border:none;
-  cursor:pointer;
 }
 
 /* COUNTDOWN */
 #countdown{
   position:absolute;
-  top:280px;
+  top:260px;
   left:50%;
   transform:translate(-50%,-50%);
-  font-size:50px;
+  font-size:45px;
   color:#ff2e6d;
   font-weight:bold;
   text-shadow:0 0 10px white;
@@ -82,10 +85,9 @@ body{
   height:100%;
   background:white;
   opacity:0;
-  pointer-events:none;
 }
 .flash.active{
-  animation:flash 0.3s;
+  animation:flash .3s;
 }
 @keyframes flash{
   0%{opacity:1;}
@@ -100,9 +102,9 @@ body{
 /* STRIP */
 #strip{
   background:white;
-  padding:15px;
-  border-radius:20px;
-  min-height:300px;
+  padding:10px;
+  border-radius:15px;
+  min-height:250px;
   width:200px;
   box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
@@ -112,7 +114,6 @@ body{
   position:relative;
   margin-bottom:10px;
 }
-
 .photo img{
   width:160px;
   border-radius:10px;
@@ -121,9 +122,9 @@ body{
 /* STICKER */
 .sticker{
   position:absolute;
-  width:50px;
-  cursor:grab;
+  width:45px;
   touch-action:none;
+  cursor:grab;
 }
 
 /* PANEL */
@@ -140,10 +141,9 @@ body{
 
 .sticker-panel img{
   width:40px;
-  cursor:pointer;
 }
 
-/* BUTTONS */
+/* BUTTON */
 button{
   margin-top:10px;
   padding:8px;
@@ -151,7 +151,6 @@ button{
   border-radius:10px;
   background:#ff8fab;
   color:white;
-  cursor:pointer;
 }
 
 /* POPUP */
@@ -163,43 +162,19 @@ button{
   justify-content:center;
   align-items:center;
 }
-.photo{
-  position:relative;
-  margin-bottom:10px;
-}
-
-.photo img{
-  width:140px;
-  border-radius:10px;
-  display:block;
-}
-
-/* FIXED STICKER AREA */
-.sticker{
-  position:absolute;
-  width:50px;
-  cursor:grab;
-  user-select:none;
-  touch-action:none;
-  z-index:10;
-}
 
 .popup-box{
   background:white;
-  padding:20px;
-  border-radius:20px;
+  padding:15px;
+  border-radius:15px;
   text-align:center;
-  animation:pop 0.3s ease;
 }
 
-@keyframes pop{
-  from{transform:scale(0.5);opacity:0;}
-  to{transform:scale(1);opacity:1;}
-}
-
-#preview img{
-  width:180px;
-  margin:5px;
+@media(max-width:768px){
+  .wrapper{
+    flex-direction:column;
+    align-items:center;
+  }
 }
 </style>
 </head>
@@ -243,13 +218,12 @@ button{
 <button onclick="downloadStrip()">DOWNLOAD 💾</button>
 
 </div>
-
 </div>
 
 <!-- POPUP -->
 <div class="popup" id="popup">
   <div class="popup-box">
-    <h2>💖 Your Strip is Ready!</h2>
+    <h2>Your Strip 💖</h2>
     <div id="preview"></div>
     <button onclick="closePopup()">Close</button>
   </div>
@@ -272,10 +246,12 @@ navigator.mediaDevices.getUserMedia({video:true})
 /* TIMER */
 async function timer(){
   const steps=["Ready...","Set...","Paws 🐾"];
+
   for(let t of steps){
     countdown.innerText=t;
-    await new Promise(r=>setTimeout(r,800));
+    await new Promise(r=>setTimeout(r,700));
   }
+
   countdown.innerText="";
 }
 
@@ -317,145 +293,99 @@ async function startBooth(){
   }
 }
 
-/* ADD STICKER */
+/* STICKER */
 function addSticker(src){
   if(!currentPhoto) return;
 
-  const sticker=document.createElement("img");
-  sticker.src=src;
-  sticker.className="sticker";
+  const s=document.createElement("img");
+  s.src=src;
+  s.className="sticker";
 
-  // start position inside photo
-  sticker.style.left="40px";
-  sticker.style.top="40px";
+  s.style.left="30px";
+  s.style.top="30px";
 
-  enableDrag(sticker);
-  currentPhoto.appendChild(sticker);
+  drag(s);
+  currentPhoto.appendChild(s);
 }
 
-/* ✅ FIXED DRAG (WORKS MOUSE + MOBILE PROPERLY) */
-function enableDrag(el){
+/* MOBILE + PC DRAG FIX */
+function drag(el){
 
-  let offsetX=0, offsetY=0, dragging=false;
-
-  el.addEventListener("mousedown",e=>{
-    dragging=true;
-    offsetX=e.offsetX;
-    offsetY=e.offsetY;
-  });
-
-  document.addEventListener("mousemove",e=>{
-    if(!dragging) return;
-
-    const parent=el.parentElement.getBoundingClientRect();
-
-    el.style.left=(e.clientX - parent.left - offsetX)+"px";
-    el.style.top=(e.clientY - parent.top - offsetY)+"px";
-  });
-
-  document.addEventListener("mouseup",()=>dragging=false);
-
-  /* MOBILE TOUCH */
-  el.addEventListener("touchstart",e=>{
-    dragging=true;
-    const t=e.touches[0];
-    offsetX=t.clientX - el.offsetLeft;
-    offsetY=t.clientY - el.offsetTop;
-  });
-
-  document.addEventListener("touchmove",e=>{
-    if(!dragging) return;
-
-    const t=e.touches[0];
-    const parent=el.parentElement.getBoundingClientRect();
-
-    el.style.left=(t.clientX - parent.left - offsetX)+"px";
-    el.style.top=(t.clientY - parent.top - offsetY)+"px";
-  });
-
-  document.addEventListener("touchend",()=>dragging=false);
-}
-
-/* DRAG FIX (MOUSE + TOUCH) */
-function makeDrag(el){
-
-  let x=0,y=0,drag=false;
+  let dx=0,dy=0,drag=false;
 
   el.addEventListener("mousedown",e=>{
     drag=true;
-    x=e.offsetX;
-    y=e.offsetY;
+    dx=e.offsetX;
+    dy=e.offsetY;
   });
 
   document.addEventListener("mousemove",e=>{
     if(!drag) return;
-    el.style.left=(e.pageX-x)+"px";
-    el.style.top=(e.pageY-y)+"px";
+    const r=el.parentElement.getBoundingClientRect();
+    el.style.left=(e.clientX-r.left-dx)+"px";
+    el.style.top=(e.clientY-r.top-dy)+"px";
   });
 
   document.addEventListener("mouseup",()=>drag=false);
 
-  /* TOUCH */
+  /* MOBILE */
   el.addEventListener("touchstart",e=>{
     drag=true;
-    x=e.touches[0].clientX - el.offsetLeft;
-    y=e.touches[0].clientY - el.offsetTop;
+    const t=e.touches[0];
+    dx=t.clientX-el.offsetLeft;
+    dy=t.clientY-el.offsetTop;
   });
 
   document.addEventListener("touchmove",e=>{
     if(!drag) return;
-    el.style.left=(e.touches[0].clientX-x)+"px";
-    el.style.top=(e.touches[0].clientY-y)+"px";
+    const t=e.touches[0];
+    const r=el.parentElement.getBoundingClientRect();
+    el.style.left=(t.clientX-r.left-dx)+"px";
+    el.style.top=(t.clientY-r.top-dy)+"px";
   });
 
   document.addEventListener("touchend",()=>drag=false);
 }
 
-/* DONE POPUP */
+/* DONE → POPUP + RESET */
 function done(){
   document.getElementById("preview").innerHTML=strip.innerHTML;
   document.getElementById("popup").style.display="flex";
+
+  setTimeout(()=>{
+    strip.innerHTML="";
+    currentPhoto=null;
+  },500);
 }
 
 function closePopup(){
   document.getElementById("popup").style.display="none";
 }
 
-/* DOWNLOAD FIX */
+/* DOWNLOAD */
 function downloadStrip(){
 
   const photos=document.querySelectorAll(".photo");
-  if(!photos.length){
-    alert("Take photos first!");
-    return;
-  }
+  if(!photos.length) return;
 
   const c=document.createElement("canvas");
   const ctx=c.getContext("2d");
 
-  const w=250;
-  const h=180;
-
-  c.width=w;
-  c.height=photos.length*h;
+  c.width=250;
+  c.height=photos.length*180;
 
   let y=0;
 
   photos.forEach(p=>{
-
     const img=p.querySelector("img");
     ctx.drawImage(img,20,y,200,150);
-
-    y+=h;
+    y+=180;
   });
 
   const link=document.createElement("a");
   link.download="meowcam.png";
   link.href=c.toDataURL("image/png");
-
-  document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
 }
 
 </script>
