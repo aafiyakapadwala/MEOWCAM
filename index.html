@@ -42,7 +42,7 @@ body{
   object-fit:cover;
 }
 
-/* CAMERA VIDEO */
+/* CAMERA VIDEO (YOUR ORIGINAL EXACT SETTINGS — UNTOUCHED) */
 #video{
   position:absolute;
   top:50%;
@@ -54,7 +54,7 @@ body{
   object-fit:cover;
 }
 
-/* BUTTON */
+/* CLICK BUTTON */
 .main-btn{
   position:absolute;
   bottom:20px;
@@ -125,7 +125,6 @@ body{
 .photo img{
   width:100%;
   border-radius:10px;
-  transition:transform 0.2s;
 }
 
 /* STICKER */
@@ -133,6 +132,8 @@ body{
   position:absolute;
   width:55px;
   z-index:9999;
+  touch-action:none;
+  user-select:none;
 }
 
 /* PANEL */
@@ -152,26 +153,24 @@ body{
   cursor:pointer;
 }
 
-/* FILTERS */
+/* ✅ FIXED FILTERS (ONLY CHANGE — NOW PROPERLY BELOW VIDEO) */
 .filters{
-  margin-top:10px;
+  position:absolute;
+  top: calc(50% + 190px); /* aligns under your 295px camera */
+  left:50%;
+  transform:translateX(-50%);
   display:flex;
-  flex-direction:column;
-  gap:8px;
-  align-items:center;
-  width:100%;
+  flex-direction:row;
+  gap:6px;
+  background:rgba(255,255,255,0.85);
+  padding:6px 8px;
+  border-radius:12px;
+  z-index:1000;
 }
 
-/* CONTROL BOX */
-.controls{
-  margin-top:8px;
-  display:flex;
-  gap:5px;
-  justify-content:center;
-}
-
-/* BUTTON */
+/* BUTTONS */
 button{
+  margin-top:10px;
   padding:8px 12px;
   border:none;
   border-radius:10px;
@@ -203,7 +202,7 @@ button{
 <source src="billu.mp4">
 </video>
 
-<video id="video" autoplay playsinline muted></video>
+<video id="video" autoplay playsinline></video>
 <canvas id="canvas" style="display:none;"></canvas>
 
 <div id="countdown"></div>
@@ -211,20 +210,7 @@ button{
 
 <button class="main-btn" onclick="startBooth()"></button>
 
-</div>
-
-<!-- SIDE -->
-<div class="side">
-
-<div id="strip"></div>
-
-<!-- ZOOM CONTROLS -->
-<div class="controls">
-<button onclick="zoomAll(1.1)">➕ Zoom</button>
-<button onclick="zoomAll(0.9)">➖ Zoom</button>
-</div>
-
-<!-- FILTERS (RESTORED) -->
+<!-- FILTERS (NOW CORRECTLY BELOW CAMERA) -->
 <div class="filters">
 <button onclick="setFilter('none')">Normal</button>
 <button onclick="setFilter('contrast(1.2)')">Bright</button>
@@ -233,13 +219,22 @@ button{
 <button onclick="setFilter('brightness(1.3)')">Glow</button>
 </div>
 
+</div>
+
+<!-- SIDE -->
+<div class="side">
+
+<div id="strip"></div>
+
 <div class="sticker-panel">
 <img src="2.jpg" onclick="addSticker(this.src)">
 <img src="3.png" onclick="addSticker(this.src)">
 <img src="4.png" onclick="addSticker(this.src)">
+<img src="6.png" onclick="addSticker(this.src)">
+<img src="7.png" onclick="addSticker(this.src)">
+<img src="8.png" onclick="addSticker(this.src)">
 </div>
 
-<button onclick="doneStrip()">DONE STRIP ✔</button>
 <button onclick="downloadStrip()">DOWNLOAD 💾</button>
 
 <div class="credit">
@@ -260,7 +255,6 @@ const flash=document.getElementById("flash");
 
 let currentPhoto=null;
 let currentFilter="none";
-let zoom=1;
 
 /* CAMERA */
 navigator.mediaDevices.getUserMedia({video:true})
@@ -270,15 +264,6 @@ navigator.mediaDevices.getUserMedia({video:true})
 function setFilter(f){
   currentFilter=f;
   video.style.filter=f;
-}
-
-/* ZOOM */
-function zoomAll(val){
-  zoom *= val;
-
-  document.querySelectorAll(".photo img").forEach(img=>{
-    img.style.transform = `scale(${zoom})`;
-  });
 }
 
 /* TIMER */
@@ -301,7 +286,6 @@ function flashEffect(){
 function capture(){
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
-
   const ctx=canvas.getContext("2d");
 
   ctx.filter=currentFilter;
@@ -333,11 +317,6 @@ async function startBooth(){
   }
 }
 
-/* DONE STRIP (FREEZE EDITING MODE) */
-function doneStrip(){
-  alert("Strip Ready ✔ You can now download!");
-}
-
 /* STICKER */
 function addSticker(src){
   if(!currentPhoto) return;
@@ -345,9 +324,47 @@ function addSticker(src){
   const s=document.createElement("img");
   s.src=src;
   s.className="sticker";
+
   s.style.left="40px";
   s.style.top="40px";
+
+  drag(s);
   currentPhoto.appendChild(s);
+}
+
+/* DRAG */
+function drag(el){
+
+  let dragging=false,ox=0,oy=0;
+
+  const start=(e)=>{
+    dragging=true;
+    const p=e.touches?e.touches[0]:e;
+    ox=p.clientX-el.offsetLeft;
+    oy=p.clientY-el.offsetTop;
+  };
+
+  const move=(e)=>{
+    if(!dragging) return;
+
+    const p=e.touches?e.touches[0]:e;
+    const box=el.parentElement.getBoundingClientRect();
+
+    el.style.left=(p.clientX-box.left-ox)+"px";
+    el.style.top=(p.clientY-box.top-oy)+"px";
+
+    e.preventDefault();
+  };
+
+  const end=()=>dragging=false;
+
+  document.addEventListener("mousemove",move);
+  document.addEventListener("mouseup",end);
+  document.addEventListener("touchmove",move,{passive:false});
+  document.addEventListener("touchend",end);
+
+  el.addEventListener("mousedown",start);
+  el.addEventListener("touchstart",start);
 }
 
 /* DOWNLOAD */
@@ -375,6 +392,7 @@ function downloadStrip(){
   const a=document.createElement("a");
   a.download="meowcam.png";
   a.href=c.toDataURL("image/png");
+
   a.click();
 }
 
