@@ -33,7 +33,7 @@ body{
   background:black;
 }
 
-/* BG */
+/* BACKGROUND */
 .bg-video{
   position:absolute;
   width:100%;
@@ -41,12 +41,12 @@ body{
   object-fit:cover;
 }
 
-/* 🔥 MIRROR FIX (SELFIE MODE) */
+/* ❌ NO MIRROR (SELFIE OFF) */
 #video{
   position:absolute;
   top:140px;
   left:50%;
-  transform:translateX(-50%) scaleX(-1);
+  transform:translateX(-50%);
   width:240px;
   height:240px;
   border-radius:15px;
@@ -54,15 +54,18 @@ body{
   z-index:2;
 }
 
-/* BUTTON */
-button{
-  margin-top:10px;
-  padding:8px 12px;
+/* YOUR ORIGINAL BUTTON (UNCHANGED POSITION) */
+.main-btn{
+  position:absolute;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  width:90px;
+  height:90px;
+  background:transparent;
   border:none;
-  border-radius:10px;
-  background:#ff8fab;
-  color:white;
   cursor:pointer;
+  z-index:50;
 }
 
 /* COUNTDOWN */
@@ -119,6 +122,7 @@ button{
   width:45px;
   z-index:9999;
   touch-action:none;
+  user-select:none;
 }
 </style>
 </head>
@@ -140,7 +144,8 @@ button{
 <div id="countdown"></div>
 <div class="flash" id="flash"></div>
 
-<button onclick="startBooth()">CLICK 📸</button>
+<!-- ✅ YOUR BUTTON ONLY -->
+<button class="main-btn" onclick="startBooth()"></button>
 
 </div>
 
@@ -192,7 +197,7 @@ function flashEffect(){
   setTimeout(()=>flash.classList.remove("active"),300);
 }
 
-/* 🔥 CLICK FIX (SAFE CAPTURE) */
+/* CAPTURE (NO MIRROR FIX) */
 function capture(){
 
   if(!video.videoWidth) return;
@@ -202,10 +207,7 @@ function capture(){
 
   const ctx=canvas.getContext("2d");
 
-  // mirror fix for final image (IMPORTANT)
-  ctx.translate(canvas.width,0);
-  ctx.scale(-1,1);
-
+  // ❌ NO MIRROR TRANSFORM (FIXED)
   ctx.drawImage(video,0,0);
 
   flashEffect();
