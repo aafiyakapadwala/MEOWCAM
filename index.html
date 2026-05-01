@@ -17,7 +17,6 @@ body{
   overflow:hidden;
 }
 
-/* WRAPPER */
 .wrapper{
   display:flex;
   gap:15px;
@@ -29,12 +28,11 @@ body{
 .container{
   position:relative;
   width:320px;
-  height:560px;   /* FIXED HEIGHT (NO CUTTING) */
+  height:560px;
   border-radius:20px;
   overflow:hidden;
 }
 
-/* BACKGROUND */
 .bg-video{
   position:absolute;
   width:100%;
@@ -42,7 +40,6 @@ body{
   object-fit:cover;
 }
 
-/* CAMERA VIDEO (CENTERED PROPERLY) */
 #video{
   position:absolute;
   top:140px;
@@ -54,7 +51,7 @@ body{
   object-fit:cover;
 }
 
-/* CLICK BUTTON FIX */
+/* CLICK */
 .main-btn{
   position:absolute;
   bottom:20px;
@@ -65,39 +62,6 @@ body{
   border:none;
   border-radius:50%;
   background:#ff8fab;
-  z-index:10;
-}
-
-/* COUNTDOWN */
-#countdown{
-  position:absolute;
-  top:220px;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-size:45px;
-  color:#ff2e6d;
-  font-weight:bold;
-  z-index:100;
-}
-
-/* FLASH */
-.flash{
-  position:absolute;
-  inset:0;
-  background:white;
-  opacity:0;
-}
-.flash.active{
-  animation:flash .3s;
-}
-@keyframes flash{
-  0%{opacity:1;}
-  100%{opacity:0;}
-}
-
-/* SIDE */
-.side{
-  text-align:center;
 }
 
 /* STRIP */
@@ -107,7 +71,6 @@ body{
   border-radius:15px;
   width:220px;
   min-height:250px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
 /* PHOTO */
@@ -123,13 +86,12 @@ body{
   display:block;
 }
 
-/* STICKER FIX */
+/* STICKER */
 .sticker{
   position:absolute;
   width:40px;
   z-index:999;
   touch-action:none;
-  user-select:none;
 }
 
 /* PANEL */
@@ -146,32 +108,45 @@ body{
 
 .sticker-panel img{
   width:35px;
-  cursor:pointer;
 }
 
-/* BUTTON */
+/* BUTTONS */
 button{
-  margin-top:10px;
+  margin-top:8px;
   padding:8px 12px;
   border:none;
   border-radius:10px;
   background:#ff8fab;
   color:white;
+  cursor:pointer;
 }
 
-/* MOBILE FIX */
+/* POPUP */
+.popup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+
+.popup-box{
+  background:white;
+  padding:15px;
+  border-radius:15px;
+  text-align:center;
+}
+
+canvas{
+  max-width:100%;
+}
+
+/* MOBILE */
 @media(max-width:768px){
   .wrapper{
     flex-direction:column;
     align-items:center;
-  }
-
-  .container{
-    transform:scale(0.95);
-  }
-
-  #strip{
-    width:260px;
   }
 }
 </style>
@@ -191,9 +166,6 @@ button{
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas" style="display:none;"></canvas>
 
-<div id="countdown"></div>
-<div class="flash" id="flash"></div>
-
 <button class="main-btn" onclick="startBooth()"></button>
 
 </div>
@@ -212,57 +184,48 @@ button{
 <img src="8.png" onclick="addSticker(this.src)">
 </div>
 
-<button onclick="downloadStrip()">DOWNLOAD 💾</button>
+<button onclick="done()">DONE ✔</button>
+<button onclick="resetStrip()">RESET 🔄</button>
 
 </div>
 
+</div>
+
+<!-- POPUP -->
+<div class="popup" id="popup">
+  <div class="popup-box">
+    <h3>💖 Your Strip</h3>
+    <canvas id="finalCanvas"></canvas><br>
+    <button onclick="downloadFinal()">DOWNLOAD 1080×270</button>
+    <button onclick="closePopup()">Close</button>
+  </div>
 </div>
 
 <script>
 
 const video=document.getElementById("video");
-const canvas=document.getElementById("canvas");
 const strip=document.getElementById("strip");
-const countdown=document.getElementById("countdown");
-const flash=document.getElementById("flash");
-
 let currentPhoto=null;
 
 /* CAMERA */
 navigator.mediaDevices.getUserMedia({video:true})
 .then(s=>video.srcObject=s);
 
-/* TIMER */
-async function timer(){
-  const steps=["Ready...","Set...","Paws 🐾"];
-  for(let t of steps){
-    countdown.innerText=t;
-    await new Promise(r=>setTimeout(r,700));
-  }
-  countdown.innerText="";
-}
-
-/* FLASH */
-function flashEffect(){
-  flash.classList.add("active");
-  setTimeout(()=>flash.classList.remove("active"),300);
-}
-
 /* CAPTURE */
 function capture(){
-  canvas.width=video.videoWidth;
-  canvas.height=video.videoHeight;
-  const ctx=canvas.getContext("2d");
+  const c=document.createElement("canvas");
+  const ctx=c.getContext("2d");
 
-  ctx.drawImage(video,0,0);
+  c.width=300;
+  c.height=200;
 
-  flashEffect();
+  ctx.drawImage(video,0,0,300,200);
 
   const div=document.createElement("div");
   div.className="photo";
 
   const img=document.createElement("img");
-  img.src=canvas.toDataURL();
+  img.src=c.toDataURL();
 
   div.appendChild(img);
   strip.appendChild(div);
@@ -270,17 +233,16 @@ function capture(){
   currentPhoto=div;
 }
 
-/* BOOTH */
+/* SIMPLE BOOTH */
 async function startBooth(){
   strip.innerHTML="";
   for(let i=0;i<3;i++){
-    await timer();
+    await new Promise(r=>setTimeout(r,700));
     capture();
-    await new Promise(r=>setTimeout(r,400));
   }
 }
 
-/* STICKER */
+/* STICKERS */
 function addSticker(src){
   if(!currentPhoto) return;
 
@@ -288,73 +250,88 @@ function addSticker(src){
   s.src=src;
   s.className="sticker";
 
-  s.style.left="50px";
-  s.style.top="50px";
+  s.style.left="40px";
+  s.style.top="40px";
 
   drag(s);
   currentPhoto.appendChild(s);
 }
 
-/* DRAG FIX */
+/* DRAG */
 function drag(el){
+  let dx=0,dy=0,drag=false;
 
-  let dragging=false,ox=0,oy=0;
+  el.addEventListener("mousedown",e=>{
+    drag=true;
+    dx=e.offsetX;
+    dy=e.offsetY;
+  });
 
-  el.addEventListener("mousedown",start);
-  el.addEventListener("touchstart",start);
+  document.addEventListener("mousemove",e=>{
+    if(!drag) return;
+    el.style.left=(e.pageX-dx)+"px";
+    el.style.top=(e.pageY-dy)+"px";
+  });
 
-  function start(e){
-    dragging=true;
-    const p=e.touches?e.touches[0]:e;
-    ox=p.clientX-el.offsetLeft;
-    oy=p.clientY-el.offsetTop;
-  }
-
-  document.addEventListener("mousemove",move);
-  document.addEventListener("touchmove",move,{passive:false});
-
-  function move(e){
-    if(!dragging) return;
-
-    const p=e.touches?e.touches[0]:e;
-    const box=el.parentElement.getBoundingClientRect();
-
-    let x=p.clientX-box.left-ox;
-    let y=p.clientY-box.top-oy;
-
-    el.style.left=x+"px";
-    el.style.top=y+"px";
-
-    e.preventDefault();
-  }
-
-  document.addEventListener("mouseup",()=>dragging=false);
-  document.addEventListener("touchend",()=>dragging=false);
+  document.addEventListener("mouseup",()=>drag=false);
 }
 
-/* DOWNLOAD */
-function downloadStrip(){
+/* RESET */
+function resetStrip(){
+  strip.innerHTML="";
+  currentPhoto=null;
+}
+
+/* DONE → POPUP */
+function done(){
 
   const photos=document.querySelectorAll(".photo");
 
-  const c=document.createElement("canvas");
+  const c=document.getElementById("finalCanvas");
   const ctx=c.getContext("2d");
 
-  c.width=250;
-  c.height=photos.length*180;
+  // 🔥 FINAL SIZE 1080 x 270
+  c.width=1080;
+  c.height=270;
 
-  let y=0;
+  ctx.fillStyle="#fff";
+  ctx.fillRect(0,0,c.width,c.height);
+
+  let x=20;
 
   photos.forEach(p=>{
     const img=p.querySelector("img");
-    ctx.drawImage(img,20,y,200,150);
-    y+=180;
+
+    ctx.drawImage(img,x,20,320,230);
+
+    // stickers
+    p.querySelectorAll(".sticker").forEach(st=>{
+      const sx=parseInt(st.style.left)||0;
+      const sy=parseInt(st.style.top)||0;
+
+      const stickerImg=new Image();
+      stickerImg.src=st.src;
+
+      ctx.drawImage(stickerImg,x+sx,20+sy,40,40);
+    });
+
+    x+=350;
   });
 
-  const a=document.createElement("a");
-  a.download="meowcam.png";
-  a.href=c.toDataURL();
+  document.getElementById("popup").style.display="flex";
+}
 
+/* CLOSE */
+function closePopup(){
+  document.getElementById("popup").style.display="none";
+}
+
+/* DOWNLOAD */
+function downloadFinal(){
+  const c=document.getElementById("finalCanvas");
+  const a=document.createElement("a");
+  a.download="meowcam-1080x270.png";
+  a.href=c.toDataURL("image/png");
   a.click();
 }
 
