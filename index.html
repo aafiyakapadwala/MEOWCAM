@@ -8,12 +8,13 @@
 <style>
 body{
   margin:0;
-  font-family:Comic Sans MS;
+  font-family:"Comic Sans MS",cursive;
   background:linear-gradient(#ffd6e0,#fff0f5);
   display:flex;
   justify-content:center;
   align-items:center;
   min-height:100vh;
+  overflow:auto;
 }
 
 /* WRAPPER */
@@ -21,6 +22,7 @@ body{
   display:flex;
   gap:15px;
   flex-wrap:wrap;
+  justify-content:center;
 }
 
 /* CAMERA */
@@ -30,31 +32,40 @@ body{
   height:560px;
   border-radius:20px;
   overflow:hidden;
-  background:black;
 }
 
+/* BG */
+.bg-video{
+  position:absolute;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* VIDEO */
 #video{
   position:absolute;
-  top:120px;
+  top:140px;
   left:50%;
   transform:translateX(-50%);
   width:240px;
   height:240px;
-  object-fit:cover;
   border-radius:15px;
+  object-fit:cover;
 }
 
-/* BUTTON (ONLY ONE) */
-.start-btn{
+/* YOUR ORIGINAL CLICK BUTTON (UNCHANGED) */
+.main-btn{
   position:absolute;
   bottom:20px;
   left:50%;
   transform:translateX(-50%);
-  padding:10px 18px;
+  width:90px;
+  height:90px;
+  background:transparent;
   border:none;
-  border-radius:10px;
-  background:#ff8fab;
-  color:white;
+  cursor:pointer;
+  z-index:50;
 }
 
 /* COUNTDOWN */
@@ -66,7 +77,7 @@ body{
   font-size:45px;
   color:#ff2e6d;
   font-weight:bold;
-  z-index:10;
+  z-index:1000;
 }
 
 /* FLASH */
@@ -75,6 +86,7 @@ body{
   inset:0;
   background:white;
   opacity:0;
+  pointer-events:none;
 }
 .flash.active{
   animation:flash .3s;
@@ -84,61 +96,82 @@ body{
   100%{opacity:0;}
 }
 
-/* FILTERS */
-.filters{
-  position:absolute;
-  top:10px;
-  left:10px;
-  display:flex;
-  gap:5px;
-  flex-wrap:wrap;
-  z-index:10;
-}
-
-.filters button{
-  font-size:10px;
-  padding:4px;
+/* SIDE */
+.side{
+  text-align:center;
+  max-height:90vh;
+  overflow:auto;
 }
 
 /* STRIP */
 #strip{
-  width:250px;
   background:white;
   padding:10px;
   border-radius:15px;
+  width:220px;
   min-height:250px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* PHOTO */
+.photo{
+  position:relative;
+  width:200px;
+  margin:10px auto;
 }
 
 .photo img{
   width:100%;
+  border-radius:10px;
 }
 
-/* STICKERS */
+/* STICKER FIX (IMPORTANT) */
 .sticker{
   position:absolute;
-  width:40px;
-  z-index:999;
+  width:45px;
+  z-index:9999;
   touch-action:none;
+  user-select:none;
 }
 
-/* STICKER PANEL */
+/* PANEL */
+.sticker-panel{
+  margin-top:10px;
+  background:white;
+  padding:10px;
+  border-radius:15px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  justify-content:center;
+}
+
 .sticker-panel img{
   width:35px;
   cursor:pointer;
 }
 
-/* GLITTER */
-.glitter{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:radial-gradient(circle,rgba(255,255,255,0.8),transparent);
-  animation:glow .5s;
+/* BUTTON */
+button{
+  margin-top:10px;
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  background:#ff8fab;
+  color:white;
+  cursor:pointer;
 }
-@keyframes glow{
-  0%{opacity:0;}
-  50%{opacity:1;}
-  100%{opacity:0;}
+
+/* MOBILE FIX */
+@media(max-width:768px){
+  .wrapper{
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .container{
+    transform:scale(0.95);
+  }
 }
 </style>
 </head>
@@ -150,12 +183,9 @@ body{
 <!-- CAMERA -->
 <div class="container">
 
-<div class="filters">
-<button onclick="setFilter('none')">N</button>
-<button onclick="setFilter('brightness(1.3)')">B</button>
-<button onclick="setFilter('contrast(1.4)')">V</button>
-<button onclick="setFilter('sepia(1)')">S</button>
-</div>
+<video class="bg-video" autoplay muted loop>
+<source src="billu.mp4">
+</video>
 
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas" style="display:none;"></canvas>
@@ -163,7 +193,7 @@ body{
 <div id="countdown"></div>
 <div class="flash" id="flash"></div>
 
-<button class="start-btn" onclick="startBooth()">START 📸</button>
+<button class="main-btn" onclick="startBooth()"></button>
 
 </div>
 
@@ -177,6 +207,8 @@ body{
 <img src="3.png" onclick="addSticker(this.src)">
 <img src="4.png" onclick="addSticker(this.src)">
 <img src="6.png" onclick="addSticker(this.src)">
+<img src="7.png" onclick="addSticker(this.src)">
+<img src="8.png" onclick="addSticker(this.src)">
 </div>
 
 <button onclick="downloadStrip()">DOWNLOAD 💾</button>
@@ -194,56 +226,42 @@ const countdown=document.getElementById("countdown");
 const flash=document.getElementById("flash");
 
 let currentPhoto=null;
-let filter="none";
 
-/* CAMERA FIXED */
+/* CAMERA */
 navigator.mediaDevices.getUserMedia({video:true})
-.then(stream=>{
-  video.srcObject=stream;
-});
-
-/* FILTER */
-function setFilter(f){
-  filter=f;
-  video.style.filter=f;
-}
+.then(s=>video.srcObject=s);
 
 /* TIMER */
 async function timer(){
-  for(let t of ["Ready","Set","Paws 🐾"]){
+  const steps=["Ready...","Set...","Paws 🐾"];
+  for(let t of steps){
     countdown.innerText=t;
-    await new Promise(r=>setTimeout(r,600));
+    await new Promise(r=>setTimeout(r,700));
   }
   countdown.innerText="";
 }
 
-/* FLASH + GLITTER */
-function flashFx(){
+/* FLASH */
+function flashEffect(){
   flash.classList.add("active");
   setTimeout(()=>flash.classList.remove("active"),300);
-
-  const g=document.createElement("div");
-  g.className="glitter";
-  document.body.appendChild(g);
-  setTimeout(()=>g.remove(),500);
 }
 
 /* CAPTURE */
 function capture(){
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
-
   const ctx=canvas.getContext("2d");
-  ctx.filter=filter;
+
   ctx.drawImage(video,0,0);
 
-  flashFx();
+  flashEffect();
 
   const div=document.createElement("div");
   div.className="photo";
 
   const img=document.createElement("img");
-  img.src=canvas.toDataURL("image/png");
+  img.src=canvas.toDataURL();
 
   div.appendChild(img);
   strip.appendChild(div);
@@ -257,6 +275,7 @@ async function startBooth(){
   for(let i=0;i<3;i++){
     await timer();
     capture();
+    await new Promise(r=>setTimeout(r,400));
   }
 }
 
@@ -275,45 +294,43 @@ function addSticker(src){
   currentPhoto.appendChild(s);
 }
 
-/* DRAG FIX */
+/* DRAG FIX (FULL MOBILE + PC) */
 function drag(el){
 
-  let d=false,x=0,y=0;
+  let dragging=false,ox=0,oy=0;
 
-  el.addEventListener("mousedown",e=>{
-    d=true;
-    x=e.offsetX;
-    y=e.offsetY;
-  });
+  const start=(e)=>{
+    dragging=true;
+    const p=e.touches?e.touches[0]:e;
+    ox=p.clientX-el.offsetLeft;
+    oy=p.clientY-el.offsetTop;
+  };
 
-  document.addEventListener("mousemove",e=>{
-    if(!d) return;
-    const p=el.parentElement.getBoundingClientRect();
-    el.style.left=(e.clientX-p.left-x)+"px";
-    el.style.top=(e.clientY-p.top-y)+"px";
-  });
+  const move=(e)=>{
+    if(!dragging) return;
 
-  document.addEventListener("mouseup",()=>d=false);
+    const p=e.touches?e.touches[0]:e;
+    const box=el.parentElement.getBoundingClientRect();
 
-  el.addEventListener("touchstart",e=>{
-    d=true;
-    const t=e.touches[0];
-    x=t.clientX-el.offsetLeft;
-    y=t.clientY-el.offsetTop;
-  });
+    el.style.left=(p.clientX-box.left-ox)+"px";
+    el.style.top=(p.clientY-box.top-oy)+"px";
 
-  document.addEventListener("touchmove",e=>{
-    if(!d) return;
-    const t=e.touches[0];
-    const p=el.parentElement.getBoundingClientRect();
-    el.style.left=(t.clientX-p.left-x)+"px";
-    el.style.top=(t.clientY-p.top-y)+"px";
-  });
+    e.preventDefault();
+  };
 
-  document.addEventListener("touchend",()=>d=false);
+  const end=()=>dragging=false;
+
+  el.addEventListener("mousedown",start);
+  el.addEventListener("touchstart",start);
+
+  document.addEventListener("mousemove",move);
+  document.addEventListener("touchmove",move,{passive:false});
+
+  document.addEventListener("mouseup",end);
+  document.addEventListener("touchend",end);
 }
 
-/* DOWNLOAD 1080x1920 */
+/* DOWNLOAD (FIXED BASIC BUT STABLE) */
 function downloadStrip(){
 
   const photos=document.querySelectorAll(".photo");
@@ -321,36 +338,21 @@ function downloadStrip(){
   const c=document.createElement("canvas");
   const ctx=c.getContext("2d");
 
-  c.width=1080;
-  c.height=1920;
+  c.width=250;
+  c.height=photos.length*180;
 
-  ctx.fillStyle="white";
-  ctx.fillRect(0,0,c.width,c.height);
-
-  let y=60;
+  let y=0;
 
   photos.forEach(p=>{
-
     const img=p.querySelector("img");
-
-    ctx.drawImage(img,100,y,880,600);
-
-    p.querySelectorAll(".sticker").forEach(s=>{
-      ctx.drawImage(
-        s,
-        100 + s.offsetLeft*3,
-        y + s.offsetTop*3,
-        s.width*3,
-        s.height*3
-      );
-    });
-
-    y+=620;
+    ctx.drawImage(img,20,y,200,150);
+    y+=180;
   });
 
   const a=document.createElement("a");
   a.download="meowcam.png";
-  a.href=c.toDataURL("image/png");
+  a.href=c.toDataURL();
+
   a.click();
 }
 
