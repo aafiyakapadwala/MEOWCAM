@@ -190,6 +190,15 @@ button{
   border-radius:10px;
   box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
+  .camera-mask{
+  position:absolute;
+  inset:0;
+  background-image:url("https://i.imgur.com/9XGQk3m.png"); /* cute frame overlay */
+  background-size:cover;
+  background-position:center;
+  pointer-events:none;
+  z-index:999;
+}
 </style>
 </head>
 
@@ -213,6 +222,7 @@ button{
 <button class="main-btn" onclick="startBooth()"></button>
 
 </div>
+  <div class="camera-mask"></div>
 
 <!-- SIDE -->
 <div class="side">
