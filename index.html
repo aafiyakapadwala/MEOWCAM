@@ -17,7 +17,6 @@ body{
   overflow:auto;
 }
 
-/* WRAPPER */
 .wrapper{
   display:flex;
   gap:15px;
@@ -25,16 +24,17 @@ body{
   justify-content:center;
 }
 
-/* CAMERA */
+/* CAMERA BOX (FIXED) */
 .container{
   position:relative;
   width:320px;
   height:560px;
   border-radius:20px;
   overflow:hidden;
+  background:#000;
 }
 
-/* BG */
+/* BACKGROUND VIDEO */
 .bg-video{
   position:absolute;
   width:100%;
@@ -42,7 +42,7 @@ body{
   object-fit:cover;
 }
 
-/* VIDEO */
+/* CAMERA STREAM (FIXED CENTER) */
 #video{
   position:absolute;
   top:140px;
@@ -52,20 +52,7 @@ body{
   height:240px;
   border-radius:15px;
   object-fit:cover;
-}
-
-/* YOUR ORIGINAL CLICK BUTTON (UNCHANGED) */
-.main-btn{
-  position:absolute;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  width:90px;
-  height:90px;
-  background:transparent;
-  border:none;
-  cursor:pointer;
-  z-index:50;
+  z-index:2;
 }
 
 /* COUNTDOWN */
@@ -77,7 +64,7 @@ body{
   font-size:45px;
   color:#ff2e6d;
   font-weight:bold;
-  z-index:1000;
+  z-index:999;
 }
 
 /* FLASH */
@@ -94,13 +81,6 @@ body{
 @keyframes flash{
   0%{opacity:1;}
   100%{opacity:0;}
-}
-
-/* SIDE */
-.side{
-  text-align:center;
-  max-height:90vh;
-  overflow:auto;
 }
 
 /* STRIP */
@@ -125,7 +105,7 @@ body{
   border-radius:10px;
 }
 
-/* STICKER FIX (IMPORTANT) */
+/* STICKERS FIXED (IMPORTANT) */
 .sticker{
   position:absolute;
   width:45px;
@@ -134,7 +114,7 @@ body{
   user-select:none;
 }
 
-/* PANEL */
+/* STICKER PANEL */
 .sticker-panel{
   margin-top:10px;
   background:white;
@@ -162,7 +142,7 @@ button{
   cursor:pointer;
 }
 
-/* MOBILE FIX */
+/* MOBILE FIX (IMPORTANT FOR "UI GONE") */
 @media(max-width:768px){
   .wrapper{
     flex-direction:column;
@@ -170,7 +150,14 @@ button{
   }
 
   .container{
-    transform:scale(0.95);
+    width:300px;
+    height:520px;
+  }
+
+  #video{
+    width:220px;
+    height:220px;
+    top:120px;
   }
 }
 </style>
@@ -193,7 +180,7 @@ button{
 <div id="countdown"></div>
 <div class="flash" id="flash"></div>
 
-<button class="main-btn" onclick="startBooth()"></button>
+<button onclick="startBooth()">START 📸</button>
 
 </div>
 
@@ -227,14 +214,15 @@ const flash=document.getElementById("flash");
 
 let currentPhoto=null;
 
-/* CAMERA */
+/* CAMERA FIX */
 navigator.mediaDevices.getUserMedia({video:true})
-.then(s=>video.srcObject=s);
+.then(stream=>{
+  video.srcObject=stream;
+});
 
 /* TIMER */
 async function timer(){
-  const steps=["Ready...","Set...","Paws 🐾"];
-  for(let t of steps){
+  for(let t of ["Ready...","Set...","Paws 🐾"]){
     countdown.innerText=t;
     await new Promise(r=>setTimeout(r,700));
   }
@@ -251,8 +239,8 @@ function flashEffect(){
 function capture(){
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
-  const ctx=canvas.getContext("2d");
 
+  const ctx=canvas.getContext("2d");
   ctx.drawImage(video,0,0);
 
   flashEffect();
@@ -294,43 +282,28 @@ function addSticker(src){
   currentPhoto.appendChild(s);
 }
 
-/* DRAG FIX (FULL MOBILE + PC) */
+/* DRAG FIX (STABLE) */
 function drag(el){
 
-  let dragging=false,ox=0,oy=0;
+  let drag=false,x=0,y=0;
 
-  const start=(e)=>{
-    dragging=true;
-    const p=e.touches?e.touches[0]:e;
-    ox=p.clientX-el.offsetLeft;
-    oy=p.clientY-el.offsetTop;
-  };
+  el.addEventListener("mousedown",e=>{
+    drag=true;
+    x=e.offsetX;
+    y=e.offsetY;
+  });
 
-  const move=(e)=>{
-    if(!dragging) return;
+  document.addEventListener("mousemove",e=>{
+    if(!drag) return;
+    const p=el.parentElement.getBoundingClientRect();
+    el.style.left=(e.clientX-p.left-x)+"px";
+    el.style.top=(e.clientY-p.top-y)+"px";
+  });
 
-    const p=e.touches?e.touches[0]:e;
-    const box=el.parentElement.getBoundingClientRect();
-
-    el.style.left=(p.clientX-box.left-ox)+"px";
-    el.style.top=(p.clientY-box.top-oy)+"px";
-
-    e.preventDefault();
-  };
-
-  const end=()=>dragging=false;
-
-  el.addEventListener("mousedown",start);
-  el.addEventListener("touchstart",start);
-
-  document.addEventListener("mousemove",move);
-  document.addEventListener("touchmove",move,{passive:false});
-
-  document.addEventListener("mouseup",end);
-  document.addEventListener("touchend",end);
+  document.addEventListener("mouseup",()=>drag=false);
 }
 
-/* DOWNLOAD (FIXED BASIC BUT STABLE) */
+/* DOWNLOAD (SAFE BASIC VERSION) */
 function downloadStrip(){
 
   const photos=document.querySelectorAll(".photo");
@@ -338,21 +311,23 @@ function downloadStrip(){
   const c=document.createElement("canvas");
   const ctx=c.getContext("2d");
 
-  c.width=250;
-  c.height=photos.length*180;
+  c.width=1080;
+  c.height=1920;
 
-  let y=0;
+  ctx.fillStyle="white";
+  ctx.fillRect(0,0,c.width,c.height);
+
+  let y=50;
 
   photos.forEach(p=>{
     const img=p.querySelector("img");
-    ctx.drawImage(img,20,y,200,150);
-    y+=180;
+    ctx.drawImage(img,100,y,880,600);
+    y+=620;
   });
 
   const a=document.createElement("a");
   a.download="meowcam.png";
-  a.href=c.toDataURL();
-
+  a.href=c.toDataURL("image/png");
   a.click();
 }
 
