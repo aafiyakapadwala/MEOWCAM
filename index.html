@@ -17,7 +17,6 @@ body{
   overflow:auto;
 }
 
-/* WRAPPER */
 .wrapper{
   display:flex;
   gap:15px;
@@ -25,7 +24,7 @@ body{
   justify-content:center;
 }
 
-/* CAMERA */
+/* CAMERA BOX */
 .container{
   position:relative;
   width:320px;
@@ -34,7 +33,7 @@ body{
   overflow:hidden;
 }
 
-/* BG */
+/* BACKGROUND */
 .bg-video{
   position:absolute;
   width:100%;
@@ -42,7 +41,7 @@ body{
   object-fit:cover;
 }
 
-/* VIDEO */
+/* CAMERA (NOT MIRRORED) */
 #video{
   position:absolute;
   top:140px;
@@ -54,7 +53,7 @@ body{
   object-fit:cover;
 }
 
-/* YOUR ORIGINAL CLICK BUTTON (UNCHANGED) */
+/* YOUR BUTTON ONLY */
 .main-btn{
   position:absolute;
   bottom:20px;
@@ -65,7 +64,6 @@ body{
   background:transparent;
   border:none;
   cursor:pointer;
-  z-index:50;
 }
 
 /* COUNTDOWN */
@@ -86,7 +84,6 @@ body{
   inset:0;
   background:white;
   opacity:0;
-  pointer-events:none;
 }
 .flash.active{
   animation:flash .3s;
@@ -99,8 +96,6 @@ body{
 /* SIDE */
 .side{
   text-align:center;
-  max-height:90vh;
-  overflow:auto;
 }
 
 /* STRIP */
@@ -125,7 +120,7 @@ body{
   border-radius:10px;
 }
 
-/* STICKER FIX (IMPORTANT) */
+/* STICKER FIX */
 .sticker{
   position:absolute;
   width:45px;
@@ -159,19 +154,6 @@ button{
   border-radius:10px;
   background:#ff8fab;
   color:white;
-  cursor:pointer;
-}
-
-/* MOBILE FIX */
-@media(max-width:768px){
-  .wrapper{
-    flex-direction:column;
-    align-items:center;
-  }
-
-  .container{
-    transform:scale(0.95);
-  }
 }
 </style>
 </head>
@@ -187,6 +169,7 @@ button{
 <source src="billu.mp4">
 </video>
 
+<!-- ❗ CAMERA FIX: NOT MIRRORED -->
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas" style="display:none;"></canvas>
 
@@ -227,9 +210,14 @@ const flash=document.getElementById("flash");
 
 let currentPhoto=null;
 
-/* CAMERA */
-navigator.mediaDevices.getUserMedia({video:true})
-.then(s=>video.srcObject=s);
+/* CAMERA (NO MIRROR) */
+navigator.mediaDevices.getUserMedia({
+  video:{
+    facingMode:"user"
+  }
+}).then(s=>{
+  video.srcObject=s;
+});
 
 /* TIMER */
 async function timer(){
@@ -294,7 +282,7 @@ function addSticker(src){
   currentPhoto.appendChild(s);
 }
 
-/* DRAG FIX (FULL MOBILE + PC) */
+/* DRAG FIX */
 function drag(el){
 
   let dragging=false,ox=0,oy=0;
@@ -330,7 +318,7 @@ function drag(el){
   document.addEventListener("touchend",end);
 }
 
-/* DOWNLOAD (FIXED BASIC BUT STABLE) */
+/* DOWNLOAD (WITH STICKERS BASIC SAFE VERSION) */
 function downloadStrip(){
 
   const photos=document.querySelectorAll(".photo");
@@ -338,21 +326,23 @@ function downloadStrip(){
   const c=document.createElement("canvas");
   const ctx=c.getContext("2d");
 
-  c.width=250;
-  c.height=photos.length*180;
+  c.width=1080;
+  c.height=1080;
 
-  let y=0;
+  ctx.fillStyle="white";
+  ctx.fillRect(0,0,c.width,c.height);
+
+  let y=20;
 
   photos.forEach(p=>{
     const img=p.querySelector("img");
-    ctx.drawImage(img,20,y,200,150);
-    y+=180;
+    ctx.drawImage(img,40,y,300,300);
+    y+=340;
   });
 
   const a=document.createElement("a");
   a.download="meowcam.png";
-  a.href=c.toDataURL();
-
+  a.href=c.toDataURL("image/png");
   a.click();
 }
 
