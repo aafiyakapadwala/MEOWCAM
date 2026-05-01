@@ -14,7 +14,6 @@ body{
   justify-content:center;
   align-items:center;
   min-height:100vh;
-  overflow:auto;
 }
 
 .wrapper{
@@ -24,17 +23,17 @@ body{
   justify-content:center;
 }
 
-/* CAMERA BOX (FIXED) */
+/* CAMERA */
 .container{
   position:relative;
   width:320px;
   height:560px;
   border-radius:20px;
   overflow:hidden;
-  background:#000;
+  background:black;
 }
 
-/* BACKGROUND VIDEO */
+/* BACKGROUND */
 .bg-video{
   position:absolute;
   width:100%;
@@ -42,17 +41,30 @@ body{
   object-fit:cover;
 }
 
-/* CAMERA STREAM (FIXED CENTER) */
+/* CAMERA VIDEO (❌ NO MIRROR FIX) */
 #video{
   position:absolute;
   top:140px;
   left:50%;
-  transform:translateX(-50%);
+  transform:translateX(-50%); /* ONLY CENTER, NO FLIP */
   width:240px;
   height:240px;
   border-radius:15px;
   object-fit:cover;
   z-index:2;
+}
+
+/* CLICK BUTTON */
+button{
+  margin-top:10px;
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  background:#ff8fab;
+  color:white;
+  cursor:pointer;
+  z-index:999;
+  position:relative;
 }
 
 /* COUNTDOWN */
@@ -64,7 +76,7 @@ body{
   font-size:45px;
   color:#ff2e6d;
   font-weight:bold;
-  z-index:999;
+  z-index:9999;
 }
 
 /* FLASH */
@@ -90,7 +102,6 @@ body{
   border-radius:15px;
   width:220px;
   min-height:250px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
 /* PHOTO */
@@ -105,7 +116,7 @@ body{
   border-radius:10px;
 }
 
-/* STICKERS FIXED (IMPORTANT) */
+/* STICKERS */
 .sticker{
   position:absolute;
   width:45px;
@@ -114,51 +125,10 @@ body{
   user-select:none;
 }
 
-/* STICKER PANEL */
-.sticker-panel{
-  margin-top:10px;
-  background:white;
-  padding:10px;
-  border-radius:15px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:5px;
-  justify-content:center;
-}
-
+/* PANEL */
 .sticker-panel img{
   width:35px;
   cursor:pointer;
-}
-
-/* BUTTON */
-button{
-  margin-top:10px;
-  padding:8px 12px;
-  border:none;
-  border-radius:10px;
-  background:#ff8fab;
-  color:white;
-  cursor:pointer;
-}
-
-/* MOBILE FIX (IMPORTANT FOR "UI GONE") */
-@media(max-width:768px){
-  .wrapper{
-    flex-direction:column;
-    align-items:center;
-  }
-
-  .container{
-    width:300px;
-    height:520px;
-  }
-
-  #video{
-    width:220px;
-    height:220px;
-    top:120px;
-  }
 }
 </style>
 </head>
@@ -174,13 +144,15 @@ button{
 <source src="billu.mp4">
 </video>
 
+<!-- ❌ FIX: no mirror transform applied -->
 <video id="video" autoplay playsinline></video>
+
 <canvas id="canvas" style="display:none;"></canvas>
 
 <div id="countdown"></div>
 <div class="flash" id="flash"></div>
 
-<button onclick="startBooth()">START 📸</button>
+<button onclick="startBooth()">CLICK 📸</button>
 
 </div>
 
@@ -194,8 +166,6 @@ button{
 <img src="3.png" onclick="addSticker(this.src)">
 <img src="4.png" onclick="addSticker(this.src)">
 <img src="6.png" onclick="addSticker(this.src)">
-<img src="7.png" onclick="addSticker(this.src)">
-<img src="8.png" onclick="addSticker(this.src)">
 </div>
 
 <button onclick="downloadStrip()">DOWNLOAD 💾</button>
@@ -235,12 +205,17 @@ function flashEffect(){
   setTimeout(()=>flash.classList.remove("active"),300);
 }
 
-/* CAPTURE */
+/* CAPTURE (FIXED CLICK ISSUE) */
 function capture(){
+
+  if(!video.videoWidth) return; // IMPORTANT FIX
+
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
 
   const ctx=canvas.getContext("2d");
+
+  // ❌ NO MIRROR
   ctx.drawImage(video,0,0);
 
   flashEffect();
@@ -260,10 +235,10 @@ function capture(){
 /* BOOTH */
 async function startBooth(){
   strip.innerHTML="";
+
   for(let i=0;i<3;i++){
     await timer();
     capture();
-    await new Promise(r=>setTimeout(r,400));
   }
 }
 
@@ -282,7 +257,7 @@ function addSticker(src){
   currentPhoto.appendChild(s);
 }
 
-/* DRAG FIX (STABLE) */
+/* DRAG */
 function drag(el){
 
   let drag=false,x=0,y=0;
@@ -303,7 +278,7 @@ function drag(el){
   document.addEventListener("mouseup",()=>drag=false);
 }
 
-/* DOWNLOAD (SAFE BASIC VERSION) */
+/* DOWNLOAD */
 function downloadStrip(){
 
   const photos=document.querySelectorAll(".photo");
