@@ -25,16 +25,17 @@ body{
   justify-content:center;
 }
 
-/* CAMERA */
+/* CAMERA BOX */
 .container{
   position:relative;
   width:350px;
   height:700px;
   border-radius:20px;
   overflow:hidden;
+  background:#fff;
 }
 
-/* BG */
+/* BACKGROUND VIDEO */
 .bg-video{
   position:absolute;
   width:100%;
@@ -42,16 +43,41 @@ body{
   object-fit:cover;
 }
 
-/* CAMERA VIDEO */
+/* CAMERA VIDEO (FIXED CENTER + MIRROR) */
 #video{
   position:absolute;
-  top:100%;
-  left:100%;
+  top:40%;
+  left:50%;
   transform:translate(-50%, -50%) rotateY(180deg);
-  width:290px;
+  width:300px;
   height:320px;
   border-radius:15px;
   object-fit:cover;
+  z-index:2;
+}
+
+/* FILTER BAR (NOW BELOW CAMERA PROPERLY) */
+.filters{
+  position:absolute;
+  bottom:110px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:6px;
+  background:rgba(255,255,255,0.8);
+  padding:6px;
+  border-radius:12px;
+  backdrop-filter:blur(5px);
+  z-index:3;
+}
+
+.filters button{
+  font-size:10px;
+  padding:5px 8px;
+  border:none;
+  border-radius:8px;
+  background:#ff8fab;
+  color:white;
 }
 
 /* CLICK BUTTON */
@@ -95,7 +121,7 @@ body{
   100%{opacity:0;}
 }
 
-/* SIDE */
+/* SIDE PANEL */
 .side{
   text-align:center;
   max-height:90vh;
@@ -136,7 +162,7 @@ body{
   user-select:none;
 }
 
-/* PANEL */
+/* STICKER PANEL */
 .sticker-panel{
   margin-top:10px;
   background:white;
@@ -153,17 +179,7 @@ body{
   cursor:pointer;
 }
 
-/* FILTERS */
-.filters{
-  margin-top:10px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  align-items:center;
-  width:100%;
-}
-
-/* BUTTON */
+/* BUTTONS */
 button{
   margin-top:10px;
   padding:8px 12px;
@@ -203,6 +219,15 @@ button{
 <div id="countdown"></div>
 <div class="flash" id="flash"></div>
 
+<!-- FILTERS (NOW CORRECT POSITION) -->
+<div class="filters">
+<button onclick="setFilter('none')">Normal</button>
+<button onclick="setFilter('contrast(1.2)')">Bright</button>
+<button onclick="setFilter('sepia(1)')">Vintage</button>
+<button onclick="setFilter('grayscale(1)')">B&W</button>
+<button onclick="setFilter('brightness(1.3)')">Glow</button>
+</div>
+
 <button class="main-btn" onclick="startBooth()"></button>
 
 </div>
@@ -219,15 +244,6 @@ button{
 <img src="6.png" onclick="addSticker(this.src)">
 <img src="7.png" onclick="addSticker(this.src)">
 <img src="8.png" onclick="addSticker(this.src)">
-</div>
-
-<!-- FILTERS -->
-<div class="filters">
-<button onclick="setFilter('none')">Normal</button>
-<button onclick="setFilter('contrast(1.2)')">Bright</button>
-<button onclick="setFilter('sepia(1)')">Vintage</button>
-<button onclick="setFilter('grayscale(1)')">B&W</button>
-<button onclick="setFilter('brightness(1.3)')">Glow</button>
 </div>
 
 <button onclick="downloadStrip()">DOWNLOAD 💾</button>
@@ -312,7 +328,7 @@ async function startBooth(){
   }
 }
 
-/* STICKER */
+/* STICKERS */
 function addSticker(src){
   if(!currentPhoto) return;
 
@@ -353,14 +369,13 @@ function drag(el){
 
   const end=()=>dragging=false;
 
+  document.addEventListener("mousemove",move);
+  document.addEventListener("mouseup",end);
+  document.addEventListener("touchmove",move,{passive:false});
+  document.addEventListener("touchend",end);
+
   el.addEventListener("mousedown",start);
   el.addEventListener("touchstart",start);
-
-  document.addEventListener("mousemove",move);
-  document.addEventListener("touchmove",move,{passive:false});
-
-  document.addEventListener("mouseup",end);
-  document.addEventListener("touchend",end);
 }
 
 /* DOWNLOAD */
