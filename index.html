@@ -17,6 +17,7 @@ body{
   overflow:auto;
 }
 
+/* WRAPPER */
 .wrapper{
   display:flex;
   gap:15px;
@@ -33,6 +34,7 @@ body{
   overflow:hidden;
 }
 
+/* BG */
 .bg-video{
   position:absolute;
   width:100%;
@@ -40,6 +42,7 @@ body{
   object-fit:cover;
 }
 
+/* CAMERA VIDEO */
 #video{
   position:absolute;
   top:50%;
@@ -51,6 +54,7 @@ body{
   object-fit:cover;
 }
 
+/* BUTTON */
 .main-btn{
   position:absolute;
   bottom:20px;
@@ -64,6 +68,7 @@ body{
   z-index:50;
 }
 
+/* COUNTDOWN */
 #countdown{
   position:absolute;
   top:220px;
@@ -75,6 +80,7 @@ body{
   z-index:1000;
 }
 
+/* FLASH */
 .flash{
   position:absolute;
   inset:0;
@@ -89,19 +95,14 @@ body{
   100%{opacity:0;}
 }
 
-/* SIDE FIXED LAYOUT */
+/* SIDE */
 .side{
+  text-align:center;
+  max-height:90vh;
+  overflow:auto;
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:10px;
-}
-
-/* WRAP STRIP + STICKERS SIDE BY SIDE */
-.right-panel{
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
 }
 
 /* STRIP */
@@ -112,24 +113,6 @@ body{
   width:220px;
   min-height:250px;
   box-shadow:0 10px 25px rgba(0,0,0,0.2);
-  position:relative;
-  z-index:2;
-}
-
-/* STICKERS RIGHT OF STRIP */
-.sticker-panel{
-  background:white;
-  padding:10px;
-  border-radius:15px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  z-index:3;
-}
-
-.sticker-panel img{
-  width:35px;
-  cursor:pointer;
 }
 
 /* PHOTO */
@@ -144,13 +127,30 @@ body{
   border-radius:10px;
 }
 
-/* STICKER FIX */
+/* STICKERS */
 .sticker{
   position:absolute;
   width:55px;
   z-index:9999;
   touch-action:none;
   user-select:none;
+}
+
+/* PANEL */
+.sticker-panel{
+  margin-top:10px;
+  background:white;
+  padding:10px;
+  border-radius:15px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  justify-content:center;
+}
+
+.sticker-panel img{
+  width:35px;
+  cursor:pointer;
 }
 
 /* FILTERS */
@@ -174,15 +174,14 @@ button{
   cursor:pointer;
 }
 
-/* CREDIT BELOW STRIP */
+/* CREDIT */
 .credit{
+  margin-top:12px;
   font-size:12px;
   background:white;
   padding:8px;
   border-radius:10px;
   box-shadow:0 5px 15px rgba(0,0,0,0.1);
-  width:220px;
-  text-align:center;
 }
 </style>
 </head>
@@ -198,7 +197,8 @@ button{
 <source src="billu.mp4">
 </video>
 
-<video id="video" autoplay playsinline></video>
+<video id="video" autoplay playsinline muted></video>
+
 <canvas id="canvas" style="display:none;"></canvas>
 
 <div id="countdown"></div>
@@ -211,9 +211,6 @@ button{
 <!-- SIDE -->
 <div class="side">
 
-<!-- STRIP + STICKERS SIDE BY SIDE -->
-<div class="right-panel">
-
 <div id="strip"></div>
 
 <div class="sticker-panel">
@@ -225,6 +222,12 @@ button{
 <img src="8.png" onclick="addSticker(this.src)">
 </div>
 
+<div class="filters">
+<button onclick="setFilter('none')">Normal</button>
+<button onclick="setFilter('contrast(1.2)')">Bright</button>
+<button onclick="setFilter('sepia(1)')">Vintage</button>
+<button onclick="setFilter('grayscale(1)')">B&W</button>
+<button onclick="setFilter('brightness(1.3)')">Glow</button>
 </div>
 
 <button onclick="downloadStrip()">DOWNLOAD 💾</button>
@@ -239,23 +242,40 @@ By <b>Aafiya Kapadwala</b>
 
 <script>
 
-const video=document.getElementById("video");
-const canvas=document.getElementById("canvas");
-const strip=document.getElementById("strip");
-const countdown=document.getElementById("countdown");
-const flash=document.getElementById("flash");
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const strip = document.getElementById("strip");
+const countdown = document.getElementById("countdown");
+const flash = document.getElementById("flash");
 
-let currentPhoto=null;
-let currentFilter="none";
+let currentPhoto = null;
+let currentFilter = "none";
 
-navigator.mediaDevices.getUserMedia({video:true})
-.then(s=>video.srcObject=s);
+/* ✅ FIXED CAMERA (WORKING ALWAYS) */
+async function startCamera(){
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: false
+    });
 
+    video.srcObject = stream;
+    await video.play();
+
+  } catch (err) {
+    alert("Camera blocked or permission denied");
+    console.log(err);
+  }
+}
+startCamera();
+
+/* FILTER */
 function setFilter(f){
-  currentFilter=f;
-  video.style.filter=f;
+  currentFilter = f;
+  video.style.filter = f;
 }
 
+/* TIMER */
 async function timer(){
   const steps=["Ready...","Set...","Paws 🐾"];
   for(let t of steps){
@@ -265,35 +285,39 @@ async function timer(){
   countdown.innerText="";
 }
 
+/* FLASH */
 function flashEffect(){
   flash.classList.add("active");
   setTimeout(()=>flash.classList.remove("active"),300);
 }
 
+/* CAPTURE */
 function capture(){
-  canvas.width=video.videoWidth;
-  canvas.height=video.videoHeight;
-  const ctx=canvas.getContext("2d");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
 
-  ctx.filter=currentFilter;
+  const ctx = canvas.getContext("2d");
+
+  ctx.filter = currentFilter;
   ctx.translate(canvas.width,0);
   ctx.scale(-1,1);
   ctx.drawImage(video,0,0);
 
   flashEffect();
 
-  const div=document.createElement("div");
-  div.className="photo";
+  const div = document.createElement("div");
+  div.className = "photo";
 
-  const img=document.createElement("img");
-  img.src=canvas.toDataURL();
+  const img = document.createElement("img");
+  img.src = canvas.toDataURL();
 
   div.appendChild(img);
   strip.appendChild(div);
 
-  currentPhoto=div;
+  currentPhoto = div;
 }
 
+/* BOOTH */
 async function startBooth(){
   strip.innerHTML="";
   for(let i=0;i<3;i++){
@@ -303,77 +327,45 @@ async function startBooth(){
   }
 }
 
+/* STICKER */
 function addSticker(src){
   if(!currentPhoto) return;
 
-  const s=document.createElement("img");
-  s.src=src;
-  s.className="sticker";
+  const s = document.createElement("img");
+  s.src = src;
+  s.className = "sticker";
 
-  s.style.left="40px";
-  s.style.top="40px";
+  s.style.left = "40px";
+  s.style.top = "40px";
 
-  drag(s);
   currentPhoto.appendChild(s);
 }
 
-function drag(el){
-
-  let dragging=false,ox=0,oy=0;
-
-  const start=(e)=>{
-    dragging=true;
-    const p=e.touches?e.touches[0]:e;
-    ox=p.clientX-el.offsetLeft;
-    oy=p.clientY-el.offsetTop;
-  };
-
-  const move=(e)=>{
-    if(!dragging) return;
-
-    const p=e.touches?e.touches[0]:e;
-    const box=el.parentElement.getBoundingClientRect();
-
-    el.style.left=(p.clientX-box.left-ox)+"px";
-    el.style.top=(p.clientY-box.top-oy)+"px";
-
-    e.preventDefault();
-  };
-
-  const end=()=>dragging=false;
-
-  document.addEventListener("mousemove",move);
-  document.addEventListener("mouseup",end);
-  document.addEventListener("touchmove",move,{passive:false});
-  document.addEventListener("touchend",end);
-
-  el.addEventListener("mousedown",start);
-  el.addEventListener("touchstart",start);
-}
-
+/* DOWNLOAD */
 function downloadStrip(){
-  const photos=document.querySelectorAll(".photo");
 
-  const c=document.createElement("canvas");
-  const ctx=c.getContext("2d");
+  const photos = document.querySelectorAll(".photo");
 
-  c.width=1080;
-  c.height=1920;
+  const c = document.createElement("canvas");
+  const ctx = c.getContext("2d");
 
-  ctx.fillStyle="white";
+  c.width = 1080;
+  c.height = 1920;
+
+  ctx.fillStyle = "white";
   ctx.fillRect(0,0,c.width,c.height);
 
-  let y=100;
+  let y = 100;
 
   photos.forEach(p=>{
-    const img=p.querySelector("img");
+    const img = p.querySelector("img");
     ctx.drawImage(img,300,y,480,360);
-    y+=400;
+    y += 400;
   });
 
-  const a=document.createElement("a");
-  a.download="meowcam.png";
-  a.href=c.toDataURL("image/png");
+  const a = document.createElement("a");
+  a.download = "meowcam.png";
+  a.href = c.toDataURL("image/png");
   a.click();
 }
 
