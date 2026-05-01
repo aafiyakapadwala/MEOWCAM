@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MEOWCAM V3 🐱💖</title>
+<title>MEOWCAM V2 🐱💖</title>
 
 <style>
 body{
@@ -16,13 +16,13 @@ body{
   min-height:100vh;
 }
 
-/* MAIN LAYOUT */
+/* WRAPPER */
 .wrapper{
   display:flex;
   gap:15px;
 }
 
-/* CAMERA BOX */
+/* CAMERA */
 .container{
   position:relative;
   width:350px;
@@ -39,7 +39,6 @@ body{
   object-fit:cover;
 }
 
-/* CAMERA */
 #video{
   position:absolute;
   top:50%;
@@ -50,7 +49,7 @@ body{
   border-radius:15px;
 }
 
-/* BUTTON */
+/* YOUR ORIGINAL CLICK BUTTON (RESTORED EXACTLY) */
 .main-btn{
   position:absolute;
   bottom:20px;
@@ -61,11 +60,12 @@ body{
   background:transparent;
   border:none;
   cursor:pointer;
+  z-index:50;
 }
 
 /* FILTERS */
 .filters{
-  margin-top:8px;
+  margin-top:10px;
   display:flex;
   gap:5px;
   justify-content:center;
@@ -78,7 +78,7 @@ body{
   gap:10px;
 }
 
-/* STRIP */
+/* STRIP WHITE BOX */
 #strip{
   width:220px;
   min-height:250px;
@@ -94,7 +94,7 @@ body{
   position:relative;
 }
 
-/* STICKER */
+/* STICKERS */
 .sticker{
   position:absolute;
   width:60px;
@@ -114,16 +114,6 @@ body{
 
 .sticker-panel img{
   width:35px;
-  cursor:pointer;
-}
-
-/* BUTTONS */
-button{
-  padding:6px 10px;
-  border:none;
-  border-radius:8px;
-  background:#ff8fab;
-  color:white;
   cursor:pointer;
 }
 
@@ -160,6 +150,7 @@ button{
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas" style="display:none;"></canvas>
 
+<!-- YOUR ORIGINAL BUTTON (UNCHANGED) -->
 <button class="main-btn" onclick="startBooth()"></button>
 
 <div class="filters">
@@ -169,8 +160,6 @@ button{
 <button onclick="setFilter('grayscale(1)')">B&W</button>
 <button onclick="setFilter('brightness(1.3)')">Glow</button>
 </div>
-
-<button onclick="finishStrip()">DONE ✔</button>
 
 </div>
 
@@ -241,7 +230,7 @@ function capture(){
   currentPhoto=div;
 }
 
-/* BOOTH */
+/* CLICK BOOTH */
 async function startBooth(){
   strip.innerHTML="";
   for(let i=0;i<3;i++){
@@ -250,7 +239,7 @@ async function startBooth(){
   }
 }
 
-/* DRAG STICKER (WORKING FIX) */
+/* STICKER DRAG FIXED */
 function addSticker(src){
   if(!currentPhoto) return;
 
@@ -272,15 +261,15 @@ function addSticker(src){
 
   document.onmousemove=e=>{
     if(!drag) return;
-    const rect=currentPhoto.getBoundingClientRect();
-    img.style.left=(e.clientX-rect.left-ox)+"px";
-    img.style.top=(e.clientY-rect.top-oy)+"px";
+    const r=currentPhoto.getBoundingClientRect();
+    img.style.left=(e.clientX-r.left-ox)+"px";
+    img.style.top=(e.clientY-r.top-oy)+"px";
   };
 
   document.onmouseup=()=>drag=false;
 }
 
-/* DONE + DOWNLOAD */
+/* DONE + PREVIEW */
 function finishStrip(){
 
   const photos=document.querySelectorAll(".photo img");
