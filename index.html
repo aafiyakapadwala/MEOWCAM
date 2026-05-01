@@ -3,31 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MEOWCAM V2 🐱💖</title>
+<title>MEOWCAM V3 🐱💖</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
 body{
   margin:0;
   font-family:"Comic Sans MS",cursive;
   background:linear-gradient(#ffd6e0,#fff0f5);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-  overflow:auto;
-}
-
-/* WRAPPER */
-.wrapper{
-  display:flex;
-  gap:15px;
-  flex-wrap:wrap;
-  justify-content:center;
-  align-items:flex-start;
 }
 
 /* CAMERA */
-.container{
+.camera-box{
   position:relative;
   width:350px;
   height:700px;
@@ -35,7 +23,6 @@ body{
   overflow:hidden;
 }
 
-/* BG */
 .bg-video{
   position:absolute;
   width:100%;
@@ -43,65 +30,43 @@ body{
   object-fit:cover;
 }
 
-/* CAMERA VIDEO */
 #video{
   position:absolute;
   top:50%;
   left:50%;
-  transform:translate(-50%, -50%) rotateY(180deg);
+  transform:translate(-50%,-50%) rotateY(180deg);
   width:290px;
   height:295px;
   border-radius:15px;
   object-fit:cover;
 }
 
-/* CLICK BUTTON (RESTORED ORIGINAL) */
-.main-btn{
-  position:absolute;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  width:90px;
-  height:90px;
-  background:transparent;
-  border:none;
-  cursor:pointer;
-  z-index:50;
-}
-
-/* COUNTDOWN */
 #countdown{
   position:absolute;
   top:220px;
   left:50%;
   transform:translate(-50%,-50%);
-  font-size:45px;
+  font-size:40px;
   color:#ff2e6d;
   font-weight:bold;
-  z-index:1000;
 }
 
-/* FLASH */
 .flash{
   position:absolute;
   inset:0;
   background:white;
   opacity:0;
 }
-.flash.active{
-  animation:flash .3s;
-}
-@keyframes flash{
-  0%{opacity:1;}
-  100%{opacity:0;}
-}
+.flash.active{animation:flash .3s;}
+@keyframes flash{0%{opacity:1;}100%{opacity:0;}}
 
-/* SIDE */
-.side{
+/* FILTERS */
+.filters{
+  margin-top:10px;
   display:flex;
-  flex-direction:row;
-  gap:10px;
-  align-items:flex-start;
+  gap:5px;
+  justify-content:center;
+  flex-wrap:wrap;
 }
 
 /* STRIP */
@@ -110,125 +75,108 @@ body{
   padding:10px;
   border-radius:15px;
   width:220px;
-  height:400px;
+  min-height:250px;
   box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
-/* STICKER PANEL */
-.sticker-panel{
-  background:white;
-  padding:10px;
-  border-radius:15px;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  width:90px;
+/* STICKERS */
+.sticker-box{
+  position:absolute;
+  width:80px;
+}
+
+.handle{
+  width:14px;
+  height:14px;
+  background:#ff4d88;
+  position:absolute;
+  right:0;
+  bottom:0;
+  border-radius:50%;
+  cursor:nwse-resize;
 }
 
 .sticker-panel img{
-  width:35px;
+  width:40px;
   cursor:pointer;
-}
-
-/* PHOTO */
-.photo{
-  position:relative;
-  width:200px;
-  margin:10px auto;
-}
-
-.photo img{
-  width:100%;
-  border-radius:10px;
-}
-
-/* STICKER */
-.sticker{
-  position:absolute;
-  width:55px;
-  z-index:9999;
-}
-
-/* BUTTON */
-button{
-  padding:8px 12px;
-  border:none;
-  border-radius:10px;
-  background:#ff8fab;
-  color:white;
-  cursor:pointer;
+  margin:3px;
 }
 
 /* CREDIT */
 .credit{
-  margin-top:10px;
   font-size:12px;
   background:white;
-  padding:8px;
+  padding:6px;
   border-radius:10px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+  text-align:center;
+  margin-top:10px;
+}
+
+/* PREVIEW MODAL */
+.preview-box{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+
+.preview-content{
+  background:white;
+  padding:15px;
+  border-radius:15px;
   text-align:center;
 }
 
-/* FILTER FIX */
-.filters-wrapper{
-  position:absolute;
-  bottom:110px;
-  left:50%;
-  transform:translateX(-50%);
-  width:100%;
-  display:flex;
-  justify-content:center;
+.preview-content img{
+  width:250px;
+  border-radius:10px;
 }
-
-.filters{
-  display:flex;
-  gap:6px;
-  flex-wrap:wrap;
-  justify-content:center;
-  background:rgba(255,255,255,0.85);
-  padding:6px;
-  border-radius:12px;
-}
-
 </style>
 </head>
 
 <body>
 
-<div class="wrapper">
+<div class="container-fluid py-3">
+<div class="row justify-content-center">
 
 <!-- CAMERA -->
-<div class="container">
+<div class="col-lg-4 col-md-6 col-12 d-flex flex-column align-items-center">
+
+<div class="camera-box">
 
 <video class="bg-video" autoplay muted loop>
 <source src="billu.mp4">
 </video>
 
 <video id="video" autoplay playsinline></video>
-<canvas id="canvas" style="display:none;"></canvas>
+<canvas id="canvas" class="d-none"></canvas>
 
 <div id="countdown"></div>
 <div class="flash" id="flash"></div>
 
-<!-- RESTORED CLICK BUTTON -->
-<button class="main-btn" onclick="startBooth()"></button>
+</div>
 
 <!-- FILTERS -->
-<div class="filters-wrapper">
-  <div class="filters">
-    <button onclick="setFilter('none')">Normal</button>
-    <button onclick="setFilter('contrast(1.2)')">Bright</button>
-    <button onclick="setFilter('sepia(1)')">Vintage</button>
-    <button onclick="setFilter('grayscale(1)')">B&W</button>
-    <button onclick="setFilter('brightness(1.3)')">Glow</button>
-  </div>
+<div class="filters mt-2">
+<button onclick="setFilter('none')" class="btn btn-sm btn-light">Normal</button>
+<button onclick="setFilter('contrast(1.2)')" class="btn btn-sm btn-light">Bright</button>
+<button onclick="setFilter('sepia(1)')" class="btn btn-sm btn-light">Vintage</button>
+<button onclick="setFilter('grayscale(1)')" class="btn btn-sm btn-light">B&W</button>
+<button onclick="setFilter('brightness(1.3)')" class="btn btn-sm btn-light">Glow</button>
 </div>
+
+<button class="btn btn-danger mt-2" onclick="startBooth()">CLICK 📸</button>
+
+<!-- NEW DONE BUTTON -->
+<button class="btn btn-success mt-2" onclick="finishStrip()">DONE ✔</button>
 
 </div>
 
 <!-- SIDE -->
-<div class="side">
+<div class="col-lg-4 col-md-6 col-12 d-flex gap-2">
 
 <div id="strip"></div>
 
@@ -241,12 +189,21 @@ button{
 <img src="8.png" onclick="addSticker(this.src)">
 </div>
 
-<div class="credit">
-By <b>Aafiya Kapadwala</b>
 </div>
 
 </div>
+</div>
 
+<!-- PREVIEW MODAL -->
+<div class="preview-box" id="previewBox">
+  <div class="preview-content">
+    <h5>✨ Your Strip Preview</h5>
+    <img id="finalPreview">
+    <br><br>
+    <a id="downloadLink" class="btn btn-success">Download 💾</a>
+    <br><br>
+    <button class="btn btn-danger" onclick="closePreview()">Close</button>
+  </div>
 </div>
 
 <script>
@@ -254,8 +211,6 @@ By <b>Aafiya Kapadwala</b>
 const video=document.getElementById("video");
 const canvas=document.getElementById("canvas");
 const strip=document.getElementById("strip");
-const countdown=document.getElementById("countdown");
-const flash=document.getElementById("flash");
 
 let currentPhoto=null;
 let currentFilter="none";
@@ -263,37 +218,22 @@ let currentFilter="none";
 navigator.mediaDevices.getUserMedia({video:true})
 .then(s=>video.srcObject=s);
 
+/* FILTER */
 function setFilter(f){
   currentFilter=f;
   video.style.filter=f;
 }
 
-async function timer(){
-  const steps=["Ready...","Set...","Paws 🐾"];
-  for(let t of steps){
-    countdown.innerText=t;
-    await new Promise(r=>setTimeout(r,700));
-  }
-  countdown.innerText="";
-}
-
-function flashEffect(){
-  flash.classList.add("active");
-  setTimeout(()=>flash.classList.remove("active"),300);
-}
-
+/* CAPTURE */
 function capture(){
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
 
   const ctx=canvas.getContext("2d");
-
   ctx.filter=currentFilter;
   ctx.translate(canvas.width,0);
   ctx.scale(-1,1);
   ctx.drawImage(video,0,0);
-
-  flashEffect();
 
   const div=document.createElement("div");
   div.className="photo";
@@ -307,26 +247,102 @@ function capture(){
   currentPhoto=div;
 }
 
+/* BOOTH */
 async function startBooth(){
   strip.innerHTML="";
   for(let i=0;i<3;i++){
-    await timer();
     capture();
     await new Promise(r=>setTimeout(r,400));
   }
 }
 
+/* STICKER */
 function addSticker(src){
   if(!currentPhoto) return;
 
-  const s=document.createElement("img");
-  s.src=src;
-  s.className="sticker";
+  const box=document.createElement("div");
+  box.className="sticker-box";
+  box.style.left="40px";
+  box.style.top="40px";
 
-  s.style.left="40px";
-  s.style.top="40px";
+  const img=document.createElement("img");
+  img.src=src;
+  img.style.width="100%";
 
-  currentPhoto.appendChild(s);
+  const handle=document.createElement("div");
+  handle.className="handle";
+
+  box.appendChild(img);
+  box.appendChild(handle);
+  currentPhoto.appendChild(box);
+
+  drag(box);
+  resize(box,handle);
+}
+
+/* DRAG */
+function drag(el){
+  let drag=false,ox=0,oy=0;
+
+  el.onmousedown=e=>{
+    drag=true;
+    ox=e.clientX-el.offsetLeft;
+    oy=e.clientY-el.offsetTop;
+  };
+
+  document.onmousemove=e=>{
+    if(!drag) return;
+    const p=el.parentElement.getBoundingClientRect();
+    el.style.left=(e.clientX-p.left-ox)+"px";
+    el.style.top=(e.clientY-p.top-oy)+"px";
+  };
+
+  document.onmouseup=()=>drag=false;
+}
+
+/* RESIZE */
+function resize(box,handle){
+  let resizing=false;
+
+  handle.onmousedown=e=>{
+    resizing=true;
+    e.stopPropagation();
+  };
+
+  document.onmousemove=e=>{
+    if(!resizing) return;
+    box.style.width=(box.offsetWidth + e.movementX)+"px";
+  };
+
+  document.onmouseup=()=>resizing=false;
+}
+
+/* DONE → PREVIEW + DOWNLOAD */
+function finishStrip(){
+  const imgs=document.querySelectorAll(".photo img");
+
+  const c=document.createElement("canvas");
+  const ctx=c.getContext("2d");
+
+  c.width=300;
+  c.height=imgs.length*300;
+
+  imgs.forEach((img,i)=>{
+    ctx.drawImage(img,0,i*300,300,300);
+  });
+
+  const final=c.toDataURL("image/png");
+
+  document.getElementById("finalPreview").src=final;
+  document.getElementById("downloadLink").href=final;
+  document.getElementById("downloadLink").download="meowcam-strip.png";
+
+  document.getElementById("previewBox").style.display="flex";
+}
+
+/* CLOSE */
+function closePreview(){
+  document.getElementById("previewBox").style.display="none";
 }
 
 </script>
