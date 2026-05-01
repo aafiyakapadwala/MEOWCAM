@@ -14,6 +14,7 @@ body{
   justify-content:center;
   align-items:center;
   min-height:100vh;
+  overflow:hidden;
 }
 
 /* WRAPPER */
@@ -28,11 +29,12 @@ body{
 .container{
   position:relative;
   width:320px;
-  height:600px;
+  height:560px;   /* FIXED HEIGHT (NO CUTTING) */
   border-radius:20px;
   overflow:hidden;
 }
 
+/* BACKGROUND */
 .bg-video{
   position:absolute;
   width:100%;
@@ -40,33 +42,36 @@ body{
   object-fit:cover;
 }
 
+/* CAMERA VIDEO (CENTERED PROPERLY) */
 #video{
   position:absolute;
-  top:160px;
-  left:35px;
-  width:250px;
-  height:250px;
+  top:140px;
+  left:50%;
+  transform:translateX(-50%);
+  width:240px;
+  height:240px;
   border-radius:15px;
   object-fit:cover;
 }
 
-/* BUTTON */
+/* CLICK BUTTON FIX */
 .main-btn{
   position:absolute;
-  bottom:10px;
+  bottom:20px;
   left:50%;
   transform:translateX(-50%);
-  width:80px;
-  height:80px;
+  width:85px;
+  height:85px;
   border:none;
   border-radius:50%;
   background:#ff8fab;
+  z-index:10;
 }
 
 /* COUNTDOWN */
 #countdown{
   position:absolute;
-  top:250px;
+  top:220px;
   left:50%;
   transform:translate(-50%,-50%);
   font-size:45px;
@@ -102,6 +107,7 @@ body{
   border-radius:15px;
   width:220px;
   min-height:250px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
 /* PHOTO */
@@ -153,19 +159,19 @@ button{
   color:white;
 }
 
-/* MOBILE */
+/* MOBILE FIX */
 @media(max-width:768px){
   .wrapper{
     flex-direction:column;
     align-items:center;
   }
 
-  #strip{
-    width:260px;
-  }
-
   .container{
     transform:scale(0.95);
+  }
+
+  #strip{
+    width:260px;
   }
 }
 </style>
@@ -289,7 +295,7 @@ function addSticker(src){
   currentPhoto.appendChild(s);
 }
 
-/* DRAG FIX (MOBILE + PC) */
+/* DRAG FIX */
 function drag(el){
 
   let dragging=false,ox=0,oy=0;
