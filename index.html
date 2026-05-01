@@ -14,11 +14,16 @@ body{
   justify-content:center;
   align-items:center;
   min-height:100vh;
+  overflow:auto;
 }
 
+/* WRAPPER */
 .wrapper{
   display:flex;
   gap:15px;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:flex-start;
 }
 
 /* CAMERA */
@@ -30,6 +35,7 @@ body{
   overflow:hidden;
 }
 
+/* BG */
 .bg-video{
   position:absolute;
   width:100%;
@@ -37,17 +43,19 @@ body{
   object-fit:cover;
 }
 
+/* CAMERA VIDEO */
 #video{
   position:absolute;
   top:50%;
   left:50%;
-  transform:translate(-50%,-50%) rotateY(180deg);
+  transform:translate(-50%, -50%) rotateY(180deg);
   width:290px;
   height:295px;
   border-radius:15px;
+  object-fit:cover;
 }
 
-/* YOUR CLICK BUTTON (UNCHANGED) */
+/* BUTTON */
 .main-btn{
   position:absolute;
   bottom:20px;
@@ -58,82 +66,119 @@ body{
   background:transparent;
   border:none;
   cursor:pointer;
+  z-index:50;
 }
 
-/* FILTERS (RESTORED) */
-.filters{
+/* COUNTDOWN */
+#countdown{
   position:absolute;
-  bottom:120px;
+  top:220px;
   left:50%;
-  transform:translateX(-50%);
-  display:flex;
-  gap:5px;
-  flex-wrap:wrap;
-  justify-content:center;
-  background:rgba(255,255,255,0.8);
-  padding:5px;
-  border-radius:10px;
+  transform:translate(-50%,-50%);
+  font-size:45px;
+  color:#ff2e6d;
+  font-weight:bold;
+  z-index:1000;
 }
 
-/* SIDE */
+/* FLASH */
+.flash{
+  position:absolute;
+  inset:0;
+  background:white;
+  opacity:0;
+}
+.flash.active{
+  animation:flash .3s;
+}
+@keyframes flash{
+  0%{opacity:1;}
+  100%{opacity:0;}
+}
+
+/* SIDE WRAPPER FIX */
 .side{
   display:flex;
+  flex-direction:row;
   gap:10px;
+  align-items:flex-start;
 }
 
 /* STRIP */
 #strip{
-  width:220px;
-  min-height:250px;
   background:white;
-  border-radius:15px;
   padding:10px;
+  border-radius:15px;
+  width:220px;
+  height:400px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
-/* PHOTO */
-.photo{
-  width:200px;
-  margin:10px auto;
-  position:relative;
-}
-
-/* STICKERS */
-.sticker{
-  position:absolute;
-  width:60px;
-  cursor:move;
-}
-
-/* PANEL */
+/* STICKER SECTION (RIGHT SIDE OF STRIP) */
 .sticker-panel{
-  width:90px;
   background:white;
   padding:10px;
   border-radius:15px;
   display:flex;
   flex-direction:column;
-  gap:5px;
+  gap:6px;
+  width:90px;
 }
 
+/* STICKER IMAGES */
 .sticker-panel img{
   width:35px;
   cursor:pointer;
 }
 
-/* PREVIEW POPUP */
-.preview{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.7);
-  justify-content:center;
-  align-items:center;
+/* PHOTO */
+.photo{
+  position:relative;
+  width:200px;
+  margin:10px auto;
 }
 
-.preview-box{
-  background:white;
-  padding:15px;
+.photo img{
+  width:100%;
   border-radius:10px;
+}
+
+/* STICKER */
+.sticker{
+  position:absolute;
+  width:55px;
+  z-index:9999;
+}
+
+/* FILTER FIX (IMPORTANT FOR PHONE + LAPTOP) */
+.filters{
+  margin-top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  align-items:center;
+  width:100%;
+}
+
+
+/* BUTTON */
+button{
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  background:#ff8fab;
+  color:white;
+  cursor:pointer;
+}
+
+/* CREDIT */
+.credit{
+  margin-top:10px;
+  font-size:12px;
+  background:white;
+  padding:8px;
+  border-radius:10px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
   text-align:center;
 }
 </style>
@@ -153,10 +198,12 @@ body{
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas" style="display:none;"></canvas>
 
-<!-- YOUR CLICK BUTTON -->
+<div id="countdown"></div>
+<div class="flash" id="flash"></div>
+
 <button class="main-btn" onclick="startBooth()"></button>
 
-<!-- FILTERS BACK -->
+<!-- FILTERS (NOW RESPONSIVE FIXED) -->
 <div class="filters">
 <button onclick="setFilter('none')">Normal</button>
 <button onclick="setFilter('contrast(1.2)')">Bright</button>
@@ -167,29 +214,23 @@ body{
 
 </div>
 
-<!-- SIDE -->
+<!-- SIDE (FIXED LAYOUT) -->
 <div class="side">
 
 <div id="strip"></div>
 
+<!-- STICKERS RIGHT SIDE -->
 <div class="sticker-panel">
 <img src="2.jpg" onclick="addSticker(this.src)">
 <img src="3.png" onclick="addSticker(this.src)">
 <img src="4.png" onclick="addSticker(this.src)">
 <img src="6.png" onclick="addSticker(this.src)">
+<img src="7.png" onclick="addSticker(this.src)">
+<img src="8.png" onclick="addSticker(this.src)">
 </div>
 
 </div>
 
-</div>
-
-<!-- PREVIEW -->
-<div class="preview" id="preview">
-  <div class="preview-box">
-    <img id="finalImg" style="width:200px;"><br><br>
-    <button onclick="downloadImg()">Download</button>
-    <button onclick="closePreview()">Close</button>
-  </div>
 </div>
 
 <script>
@@ -197,11 +238,13 @@ body{
 const video=document.getElementById("video");
 const canvas=document.getElementById("canvas");
 const strip=document.getElementById("strip");
+const countdown=document.getElementById("countdown");
+const flash=document.getElementById("flash");
 
 let currentPhoto=null;
 let currentFilter="none";
 
-/* CAMERA */
+/* CAMERA FIX */
 navigator.mediaDevices.getUserMedia({video:true})
 .then(s=>video.srcObject=s);
 
@@ -211,16 +254,35 @@ function setFilter(f){
   video.style.filter=f;
 }
 
+/* TIMER */
+async function timer(){
+  const steps=["Ready...","Set...","Paws 🐾"];
+  for(let t of steps){
+    countdown.innerText=t;
+    await new Promise(r=>setTimeout(r,700));
+  }
+  countdown.innerText="";
+}
+
+/* FLASH */
+function flashEffect(){
+  flash.classList.add("active");
+  setTimeout(()=>flash.classList.remove("active"),300);
+}
+
 /* CAPTURE */
 function capture(){
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
 
   const ctx=canvas.getContext("2d");
+
   ctx.filter=currentFilter;
   ctx.translate(canvas.width,0);
   ctx.scale(-1,1);
   ctx.drawImage(video,0,0);
+
+  flashEffect();
 
   const div=document.createElement("div");
   div.className="photo";
@@ -238,75 +300,24 @@ function capture(){
 async function startBooth(){
   strip.innerHTML="";
   for(let i=0;i<3;i++){
+    await timer();
     capture();
-    await new Promise(r=>setTimeout(r,500));
+    await new Promise(r=>setTimeout(r,400));
   }
 }
 
-/* STICKER DRAG */
+/* STICKER */
 function addSticker(src){
   if(!currentPhoto) return;
 
-  const img=document.createElement("img");
-  img.src=src;
-  img.className="sticker";
-  img.style.left="40px";
-  img.style.top="40px";
+  const s=document.createElement("img");
+  s.src=src;
+  s.className="sticker";
 
-  currentPhoto.appendChild(img);
+  s.style.left="40px";
+  s.style.top="40px";
 
-  let drag=false,ox,oy;
-
-  img.onmousedown=e=>{
-    drag=true;
-    ox=e.offsetX;
-    oy=e.offsetY;
-  };
-
-  document.onmousemove=e=>{
-    if(!drag) return;
-    const r=currentPhoto.getBoundingClientRect();
-    img.style.left=(e.clientX-r.left-ox)+"px";
-    img.style.top=(e.clientY-r.top-oy)+"px";
-  };
-
-  document.onmouseup=()=>drag=false;
-}
-
-/* DONE → PREVIEW */
-function finishStrip(){
-
-  const photos=document.querySelectorAll(".photo img");
-
-  const c=document.createElement("canvas");
-  const ctx=c.getContext("2d");
-
-  c.width=300;
-  c.height=photos.length*300;
-
-  photos.forEach((p,i)=>{
-    ctx.drawImage(p,0,i*300,300,300);
-  });
-
-  const final=c.toDataURL();
-
-  document.getElementById("finalImg").src=final;
-  document.getElementById("preview").style.display="flex";
-
-  window.finalImage=final;
-}
-
-/* DOWNLOAD */
-function downloadImg(){
-  const a=document.createElement("a");
-  a.href=window.finalImage;
-  a.download="meowcam.png";
-  a.click();
-}
-
-/* CLOSE */
-function closePreview(){
-  document.getElementById("preview").style.display="none";
+  currentPhoto.appendChild(s);
 }
 
 </script>
