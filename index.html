@@ -2,675 +2,402 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MEOWCAM V2 🐱💖</title>
 
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: "Comic Sans MS", cursive;
-  background: linear-gradient(160deg, #ffd6e0, #fff0f5);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 14px 10px 120px;
-  gap: 14px;
+body{
+  margin:0;
+  font-family:"Comic Sans MS",cursive;
+  background:linear-gradient(#ffd6e0,#fff0f5);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  overflow:auto;
 }
 
-/* ── HEADER ── */
-.header { text-align: center; }
-.header h1 { font-size: clamp(1.6rem, 7vw, 2.2rem); color: #d63870; }
-.header p  { font-size: 11px; color: #ff8fab; letter-spacing: 3px; margin-top: 2px; }
-
-/* ── CAMERA CARD ── */
-.cam-card {
-  width: 100%; max-width: 420px;
-  border-radius: 20px; overflow: hidden;
-  border: 3px solid #ffb3c6;
-  box-shadow: 0 6px 24px rgba(214,56,112,0.18);
-  background: #1a0010;
-  position: relative;
-}
-.cam-wrap {
-  position: relative; width: 100%; aspect-ratio: 4/3;
-  background: #1a0010; overflow: hidden;
+.wrapper{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  justify-content:center;
 }
 
-/* bg video */
-.bg-video {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover; opacity: 0.35;
+/* CAMERA */
+.container{
+  position:relative;
+  width:350px;
+  height:700px;
+  border-radius:20px;
+  overflow:hidden;
 }
 
-/* webcam — mirrored so it looks natural */
-#video {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  transform: scaleX(-1);   /* mirror */
-  display: block;
+.bg-video{
+  position:absolute;
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
-/* FLASH */
-.flash {
-  position: absolute; inset: 0;
-  background: white; opacity: 0;
-  pointer-events: none; z-index: 20;
-}
-.flash.active { animation: flashAnim .35s ease-out forwards; }
-@keyframes flashAnim { 0%{opacity:1;} 100%{opacity:0;} }
-
-/* COUNTDOWN */
-#countdown {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: clamp(52px, 16vw, 80px);
-  font-weight: bold; color: #ff2e6d;
-  text-shadow: 0 0 20px white, 0 0 40px rgba(255,46,109,.5);
-  z-index: 15; pointer-events: none;
+#video{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%) rotateY(180deg);
+  width:290px;
+  height:295px;
+  border-radius:15px;
+  object-fit:cover;
 }
 
-/* SNAP BUTTON */
-.snap-btn {
-  position: absolute; bottom: 12px; left: 50%;
-  transform: translateX(-50%);
-  width: clamp(62px, 17vw, 78px);
-  height: clamp(62px, 17vw, 78px);
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ff8fab, #ff2e6d);
-  border: 4px solid white;
-  box-shadow: 0 4px 18px rgba(255,46,109,.45);
-  font-size: clamp(22px, 6vw, 30px);
-  cursor: pointer; z-index: 5;
-  display: flex; align-items: center; justify-content: center;
-  transition: transform .13s;
-}
-.snap-btn:active { transform: translateX(-50%) scale(.88); }
-
-/* ── FILTERS STRIP ── */
-.filter-card {
-  width: 100%; max-width: 420px;
-  background: white;
-  border-radius: 18px;
-  border: 3px solid #ffb3c6;
-  padding: 12px 10px;
-  box-shadow: 0 4px 16px rgba(214,56,112,.1);
-}
-.card-title {
-  font-size: 13px; font-weight: bold;
-  color: #d63870; margin-bottom: 8px;
-  letter-spacing: 1px;
-}
-.filter-scroll {
-  display: flex; gap: 8px;
-  overflow-x: auto; padding-bottom: 4px;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-.filter-scroll::-webkit-scrollbar { display: none; }
-.filter-btn {
-  flex-shrink: 0;
-  padding: 7px 14px;
-  border: 2px solid #ffb3c6;
-  border-radius: 20px;
-  background: white; color: #d63870;
-  font-family: "Comic Sans MS", cursive;
-  font-size: 12px; font-weight: bold;
-  cursor: pointer; transition: all .15s;
-  white-space: nowrap;
-}
-.filter-btn:hover, .filter-btn.active {
-  background: #ff8fab; border-color: #ff8fab; color: white;
+/* BUTTON */
+.main-btn{
+  position:absolute;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  width:90px;
+  height:90px;
+  background:transparent;
+  border:none;
+  cursor:pointer;
 }
 
-/* ── STRIP CARD ── */
-.strip-card {
-  width: 100%; max-width: 420px;
-  background: white;
-  border-radius: 18px;
-  border: 3px solid #ffb3c6;
-  padding: 12px 10px;
-  box-shadow: 0 4px 16px rgba(214,56,112,.1);
-}
-/* horizontal scrolling strip */
-#strip {
-  display: flex; gap: 10px;
-  overflow-x: auto; padding-bottom: 6px;
-  min-height: 115px; align-items: flex-start;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-}
-#strip::-webkit-scrollbar { height: 4px; }
-#strip::-webkit-scrollbar-thumb { background: #ffb3c6; border-radius: 4px; }
-
-.strip-empty {
-  width: 100%; text-align: center;
-  color: #ff8fab; font-size: 13px;
-  padding: 22px 0; line-height: 2;
+/* SIDE */
+.side{
+  display:flex;
+  flex-direction:row;
+  gap:10px;
+  align-items:flex-start;
 }
 
-/* individual photo */
-.photo {
-  flex-shrink: 0;
-  scroll-snap-align: start;
-  position: relative;          /* ← stickers position relative to THIS */
-  width: 140px; height: 110px;
-  border-radius: 12px;
-  overflow: visible;            /* allow stickers to show outside a bit */
-  border: 2px solid #ffb3c6;
-  background: #ffe0ec;
-}
-.photo img.snap {
-  width: 100%; height: 100%;
-  object-fit: cover; display: block;
-  border-radius: 10px;
+/* STRIP */
+#strip{
+  background:white;
+  padding:10px;
+  border-radius:15px;
+  width:220px;
+  min-height:250px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
-/* sticker on photo */
-.sticker {
-  position: absolute;
-  width: 44px; height: 44px;
-  object-fit: contain;
-  touch-action: none;
-  cursor: grab;
-  z-index: 10;
-  user-select: none;
-  -webkit-user-select: none;
+/* STICKERS */
+.sticker-panel{
+  background:white;
+  padding:10px;
+  border-radius:15px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  width:90px;
+  align-items:center;
 }
 
-/* ── STICKER PANEL ── */
-.sticker-card {
-  width: 100%; max-width: 420px;
-  background: white;
-  border-radius: 18px;
-  border: 3px solid #ffb3c6;
-  padding: 12px 10px;
-  box-shadow: 0 4px 16px rgba(214,56,112,.1);
+.sticker-panel img{
+  width:35px;
+  cursor:pointer;
 }
-.sticker-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
-}
-.sticker-grid img {
-  width: 100%; aspect-ratio: 1;
-  object-fit: contain;
-  cursor: pointer;
-  border-radius: 10px;
-  background: #fff0f5;
-  padding: 4px;
-  border: 2px solid transparent;
-  transition: transform .15s;
-}
-.sticker-grid img:active { transform: scale(.88); border-color: #ff8fab; }
 
-/* ── FIXED BOTTOM BAR ── */
-.bottom-bar {
-  position: fixed;
-  bottom: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(255,240,245,.97);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-top: 2px solid #ffb3c6;
-  padding: 10px 16px 20px;
-  display: flex; gap: 10px;
+.photo{
+  position:relative;
+  width:200px;
+  margin:10px auto;
 }
-.bb-btn {
-  flex: 1;
-  padding: 14px 10px;
-  font-family: "Comic Sans MS", cursive;
-  font-size: clamp(14px, 4vw, 17px);
-  font-weight: bold;
-  border: none; border-radius: 14px;
-  cursor: pointer;
-  transition: transform .13s;
-  box-shadow: 0 4px 14px rgba(214,56,112,.2);
-  color: white;
-}
-.bb-btn:active { transform: scale(.93); }
-.btn-done     { background: linear-gradient(135deg,#ff8fab,#ff2e6d); }
-.btn-download { background: linear-gradient(135deg,#a78bfa,#7c3aed); }
 
-/* ── POPUP ── */
-.popup {
-  position: fixed; inset: 0; z-index: 9999;
-  background: rgba(0,0,0,.65);
-  display: none; justify-content: center; align-items: center;
-  padding: 16px;
+.photo img{
+  width:100%;
+  border-radius:10px;
 }
-.popup-box {
-  background: white;
-  padding: 20px 16px;
-  border-radius: 24px;
-  text-align: center;
-  width: 100%; max-width: 360px;
-  border: 3px solid #ffb3c6;
-  box-shadow: 0 12px 40px rgba(214,56,112,.25);
-}
-.popup-box h2 { font-size: 18px; color: #d63870; margin-bottom: 12px; }
 
-/* popup shows final strip image */
-#popup-img {
-  width: 100%;
-  max-height: 65vh;
-  object-fit: contain;
-  border-radius: 12px;
-  border: 2px solid #ffb3c6;
-  margin-bottom: 14px;
+.sticker{
+  position:absolute;
+  width:55px;
+  z-index:9999;
+  cursor:move;
 }
-.popup-btns { display: flex; gap: 10px; }
-.popup-btns .bb-btn { font-size: 14px; padding: 12px 8px; }
+
+/* FILTERS (FIXED VISIBILITY ONLY) */
+.filters{
+  position:absolute;
+  bottom:120px;   /* FIX: was missing visibility on phone */
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:5px;
+  z-index:999;
+}
+
+.filters button{
+  padding:5px 8px;
+  border:none;
+  border-radius:8px;
+  background:#ff8fab;
+  color:white;
+  font-size:10px;
+  cursor:pointer;
+}
+
+/* FLASH FIX */
+.flash{
+  position:absolute;
+  inset:0;
+  background:white;
+  opacity:0;
+  pointer-events:none;
+}
+
+.flash.active{
+  animation:flash .3s;
+}
+
+@keyframes flash{
+  0%{opacity:1;}
+  100%{opacity:0;}
+}
+
+/* COUNTDOWN FIX */
+#countdown{
+  position:absolute;
+  top:220px;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:45px;
+  color:#ff2e6d;
+  font-weight:bold;
+  z-index:1000;
+}
+
+/* BUTTON */
+button{
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  background:#ff8fab;
+  color:white;
+  cursor:pointer;
+  margin-top:8px;
+}
+
+/* POPUP */
+#popup{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:white;
+  padding:15px;
+  border-radius:15px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.3);
+  display:none;
+  z-index:99999;
+  text-align:center;
+}
+
+#popup img{
+  width:250px;
+  border-radius:10px;
+}
 </style>
 </head>
+
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <h1>🐱 MEOWCAM 💖</h1>
-  <p>snap · filter · sticker · save</p>
+<div class="wrapper">
+
+<div class="container">
+
+<video class="bg-video" autoplay muted loop>
+<source src="billu.mp4">
+</video>
+
+<video id="video" autoplay playsinline></video>
+<canvas id="canvas" style="display:none;"></canvas>
+
+<div id="countdown"></div>
+<div class="flash" id="flash"></div>
+
+<button class="main-btn" onclick="startBooth()"></button>
+
+<!-- FILTERS (NOW WORKING) -->
+<div class="filters">
+<button onclick="setFilter('none')">Normal</button>
+<button onclick="setFilter('contrast(1.2)')">Bright</button>
+<button onclick="setFilter('sepia(1)')">Vintage</button>
+<button onclick="setFilter('grayscale(1)')">B&W</button>
+<button onclick="setFilter('brightness(1.3)')">Glow</button>
 </div>
 
-<!-- CAMERA -->
-<div class="cam-card">
-  <div class="cam-wrap">
-    <video class="bg-video" autoplay muted loop playsinline>
-      <source src="billu.mp4">
-    </video>
-    <video id="video" autoplay playsinline></video>
-    <canvas id="canvas" style="display:none;"></canvas>
-    <div id="countdown"></div>
-    <div class="flash" id="flash"></div>
-    <button class="snap-btn" id="snapBtn" onclick="startBooth()">📸</button>
-  </div>
 </div>
 
-<!-- FILTERS -->
-<div class="filter-card">
-  <div class="card-title">✨ filters</div>
-  <div class="filter-scroll" id="filterRow">
-    <button class="filter-btn active" onclick="setFilter('none',this)">Normal</button>
-    <button class="filter-btn" onclick="setFilter('contrast(1.3) brightness(1.1)',this)">Bright ☀️</button>
-    <button class="filter-btn" onclick="setFilter('sepia(0.9)',this)">Vintage 📷</button>
-    <button class="filter-btn" onclick="setFilter('grayscale(1)',this)">B&W 🖤</button>
-    <button class="filter-btn" onclick="setFilter('brightness(1.35) saturate(1.4)',this)">Glow 🌟</button>
-    <button class="filter-btn" onclick="setFilter('hue-rotate(180deg) saturate(1.2)',this)">Neon 💜</button>
-    <button class="filter-btn" onclick="setFilter('saturate(2) contrast(1.1)',this)">Vivid 🌈</button>
-    <button class="filter-btn" onclick="setFilter('invert(0.15) sepia(0.4) hue-rotate(320deg)',this)">Blush 🌸</button>
-  </div>
+<div class="side">
+
+<div id="strip"></div>
+
+<div class="sticker-panel">
+<img src="2.jpg" onclick="addSticker(this.src)">
+<img src="3.png" onclick="addSticker(this.src)">
+<img src="4.png" onclick="addSticker(this.src)">
+<img src="6.png" onclick="addSticker(this.src)">
+<img src="7.png" onclick="addSticker(this.src)">
+<img src="8.png" onclick="addSticker(this.src)">
 </div>
 
-<!-- STRIP -->
-<div class="strip-card">
-  <div class="card-title">🎞 your strip</div>
-  <div id="strip">
-    <div class="strip-empty" id="strip-empty">no photos yet 🐾<br>tap 📸 to start!</div>
-  </div>
+<button onclick="done()">DONE ✔</button>
+
 </div>
 
-<!-- STICKERS -->
-<div class="sticker-card">
-  <div class="card-title">🎀 stickers — tap to add, drag to move</div>
-  <div class="sticker-grid">
-    <img src="2.jpg" onclick="addSticker(this.src)" alt="">
-    <img src="3.png" onclick="addSticker(this.src)" alt="">
-    <img src="4.png" onclick="addSticker(this.src)" alt="">
-    <img src="6.png" onclick="addSticker(this.src)" alt="">
-    <img src="7.png" onclick="addSticker(this.src)" alt="">
-    <img src="8.png" onclick="addSticker(this.src)" alt="">
-  </div>
-</div>
-
-<!-- BOTTOM BAR -->
-<div class="bottom-bar">
-  <button class="bb-btn btn-done"     onclick="done()">DONE ✔</button>
-  <button class="bb-btn btn-download" onclick="downloadStrip()">SAVE 💾</button>
 </div>
 
 <!-- POPUP -->
-<div id="popup" class="popup">
-  <div class="popup-box">
-    <h2>💖 Strip Ready!</h2>
-    <img id="popup-img" src="" alt="your strip">
-    <div class="popup-btns">
-      <button class="bb-btn btn-download" onclick="downloadFromPopup()">Download 💾</button>
-      <button class="bb-btn btn-done"     onclick="closePopup()">Close ✕</button>
-    </div>
-  </div>
+<div id="popup">
+  <h3>Strip Ready 💖</h3>
+  <img id="finalImg">
+  <br><br>
+  <button onclick="downloadFinal()">Download</button>
+  <button onclick="closePopup()">Close</button>
 </div>
 
 <script>
 
-/* ══════════════════════════════
-   ELEMENTS
-══════════════════════════════ */
-const video     = document.getElementById("video");
-const canvas    = document.getElementById("canvas");
-const strip     = document.getElementById("strip");
-const flash     = document.getElementById("flash");
-const countdownEl = document.getElementById("countdown");
+const video=document.getElementById("video");
+const canvas=document.getElementById("canvas");
+const strip=document.getElementById("strip");
+const flash=document.getElementById("flash");
+const countdown=document.getElementById("countdown");
 
-let currentPhoto   = null;
-let currentFilter  = "none";   /* CSS filter string */
-let shooting       = false;
-let finalDataUrl   = "";       /* for popup download */
+let currentPhoto=null;
+let currentFilter="none";
 
-/* ══════════════════════════════
-   CAMERA START
-══════════════════════════════ */
-navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false })
-  .then(s => { video.srcObject = s; })
-  .catch(() => {
-    countdownEl.textContent = "🚫 camera blocked";
-    countdownEl.style.fontSize = "15px";
-    countdownEl.style.color = "#ff8fab";
-  });
+/* CAMERA */
+navigator.mediaDevices.getUserMedia({video:true})
+.then(s=>video.srcObject=s);
 
-/* ══════════════════════════════
-   FILTERS
-   — sets CSS filter on the live <video>
-   — stores it so capture() bakes it into canvas
-══════════════════════════════ */
-function setFilter(f, btn) {
-  currentFilter = f;
-  /* apply visually on live feed */
-  video.style.filter = f === "none" ? "" : f;
-  /* highlight active button */
-  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-  if (btn) btn.classList.add("active");
+/* FILTER FIX */
+function setFilter(f){
+  currentFilter=f;
+  video.style.filter=f;
 }
 
-/* ══════════════════════════════
-   FLASH EFFECT
-══════════════════════════════ */
-function flashEffect() {
-  flash.classList.remove("active");
-  /* force reflow so animation restarts even on rapid shots */
-  void flash.offsetWidth;
+/* FLASH FIX */
+function flashEffect(){
   flash.classList.add("active");
+  setTimeout(()=>flash.classList.remove("active"),300);
 }
 
-/* ══════════════════════════════
-   TIMER (countdown text)
-══════════════════════════════ */
-function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-async function timer() {
-  const steps = ["Ready 🐾", "Set 😺", "Paws! 🐱"];
-  for (const t of steps) {
-    countdownEl.textContent = t;
-    await wait(700);
+/* COUNTDOWN FIX */
+async function timer(){
+  const steps=["Ready...","Set...","Paws 🐾"];
+  for(let t of steps){
+    countdown.innerText=t;
+    await new Promise(r=>setTimeout(r,700));
   }
-  countdownEl.textContent = "";
+  countdown.innerText="";
 }
 
-/* ══════════════════════════════
-   CAPTURE
-   KEY FIXES:
-   1. ctx.filter applied BEFORE drawing — bakes filter into saved image
-   2. Mirror (scaleX -1) applied on canvas so saved photo matches preview
-   3. strip-empty placeholder removed on first capture
-══════════════════════════════ */
-function capture() {
-  const W = video.videoWidth  || 640;
-  const H = video.videoHeight || 480;
-  canvas.width  = W;
-  canvas.height = H;
+/* CAPTURE */
+function capture(){
+  canvas.width=video.videoWidth;
+  canvas.height=video.videoHeight;
 
-  const ctx = canvas.getContext("2d");
+  const ctx=canvas.getContext("2d");
 
-  /* ① bake filter */
-  ctx.filter = (currentFilter && currentFilter !== "none") ? currentFilter : "none";
-
-  /* ② mirror to match the mirrored video preview */
-  ctx.save();
-  ctx.translate(W, 0);
-  ctx.scale(-1, 1);
-  ctx.drawImage(video, 0, 0, W, H);
-  ctx.restore();
-
-  ctx.filter = "none";  /* reset for any future draws */
+  ctx.filter=currentFilter;
+  ctx.translate(canvas.width,0);
+  ctx.scale(-1,1);
+  ctx.drawImage(video,0,0);
 
   flashEffect();
 
-  /* remove empty placeholder */
-  const empty = document.getElementById("strip-empty");
-  if (empty) empty.remove();
+  const div=document.createElement("div");
+  div.className="photo";
 
-  /* create photo tile */
-  const div = document.createElement("div");
-  div.className = "photo";
-
-  const img = document.createElement("img");
-  img.className = "snap";
-  img.src = canvas.toDataURL("image/jpeg", 0.92);
+  const img=document.createElement("img");
+  img.src=canvas.toDataURL();
 
   div.appendChild(img);
   strip.appendChild(div);
-  strip.scrollLeft = strip.scrollWidth;   /* scroll to newest */
 
-  currentPhoto = div;
+  currentPhoto=div;
 }
 
-/* ══════════════════════════════
-   BOOTH (3 shots)
-══════════════════════════════ */
-async function startBooth() {
-  if (shooting) return;
-  shooting = true;
-  document.getElementById("snapBtn").style.opacity = "0.5";
-
-  strip.innerHTML = "";
-  currentPhoto    = null;
-
-  for (let i = 0; i < 3; i++) {
+/* BOOTH */
+async function startBooth(){
+  strip.innerHTML="";
+  for(let i=0;i<3;i++){
     await timer();
     capture();
-    await wait(500);
+    await new Promise(r=>setTimeout(r,400));
   }
-
-  document.getElementById("snapBtn").style.opacity = "1";
-  shooting = false;
 }
 
-/* ══════════════════════════════
-   STICKERS
-   KEY FIXES:
-   1. Sticker appended to currentPhoto div (position:relative)
-   2. touch drag uses parent-relative coords — no jump on mobile
-   3. passive:false on touchmove so preventDefault works (stops scroll)
-══════════════════════════════ */
-function addSticker(src) {
-  if (!currentPhoto) {
-    strip.style.outline = "3px solid #ff8fab";
-    setTimeout(() => strip.style.outline = "", 700);
-    return;
-  }
-  const s = document.createElement("img");
-  s.src       = src;
-  s.className = "sticker";
-  s.style.left = "8px";
-  s.style.top  = "8px";
-  makeDraggable(s);
+/* STICKERS */
+function addSticker(src){
+  if(!currentPhoto) return;
+
+  const s=document.createElement("img");
+  s.src=src;
+  s.className="sticker";
+
+  s.style.left="40px";
+  s.style.top="40px";
+
   currentPhoto.appendChild(s);
+
+  let drag=false,ox=0,oy=0;
+
+  s.onmousedown=(e)=>{
+    drag=true;
+    ox=e.offsetX;
+    oy=e.offsetY;
+  };
+
+  document.onmousemove=(e)=>{
+    if(!drag) return;
+    const box=currentPhoto.getBoundingClientRect();
+    s.style.left=(e.clientX-box.left-ox)+"px";
+    s.style.top=(e.clientY-box.top-oy)+"px";
+  };
+
+  document.onmouseup=()=>drag=false;
 }
 
-function makeDraggable(el) {
-  let dragging = false;
-  let ox = 0, oy = 0;
+/* DONE */
+function done(){
+  const imgs=document.querySelectorAll(".photo img");
 
-  function parentRect() { return el.parentElement.getBoundingClientRect(); }
+  const c=document.createElement("canvas");
+  const ctx=c.getContext("2d");
 
-  function onStart(cx, cy) {
-    dragging = true;
-    el.style.cursor = "grabbing";
-    const pr   = parentRect();
-    const left = parseFloat(el.style.left) || 0;
-    const top  = parseFloat(el.style.top)  || 0;
-    ox = cx - pr.left - left;
-    oy = cy - pr.top  - top;
-  }
+  c.width=800;
+  c.height=1200;
 
-  function onMove(cx, cy) {
-    if (!dragging) return;
-    const pr = parentRect();
-    let nx = cx - pr.left - ox;
-    let ny = cy - pr.top  - oy;
-    /* soft clamp — let sticker go slightly outside (overflow:visible) */
-    nx = Math.max(-10, Math.min(pr.width  - el.offsetWidth  + 10, nx));
-    ny = Math.max(-10, Math.min(pr.height - el.offsetHeight + 10, ny));
-    el.style.left = nx + "px";
-    el.style.top  = ny + "px";
-  }
+  ctx.fillStyle="white";
+  ctx.fillRect(0,0,c.width,c.height);
 
-  function onEnd() { dragging = false; el.style.cursor = "grab"; }
+  let y=50;
 
-  /* mouse */
-  el.addEventListener("mousedown",  e => { e.preventDefault(); onStart(e.clientX, e.clientY); });
-  document.addEventListener("mousemove", e => onMove(e.clientX, e.clientY));
-  document.addEventListener("mouseup",   onEnd);
-
-  /* touch */
-  el.addEventListener("touchstart", e => {
-    e.preventDefault();
-    onStart(e.touches[0].clientX, e.touches[0].clientY);
-  }, { passive: false });
-
-  el.addEventListener("touchmove", e => {
-    e.preventDefault();
-    onMove(e.touches[0].clientX, e.touches[0].clientY);
-  }, { passive: false });
-
-  el.addEventListener("touchend", onEnd);
-}
-
-/* ══════════════════════════════
-   DONE — build strip image & show popup
-   KEY FIX: draws sticker images onto canvas too,
-   so they appear in the popup preview and download
-══════════════════════════════ */
-function done() {
-  const photos = strip.querySelectorAll(".photo");
-  if (!photos.length) { alert("snap some photos first! 🐾"); return; }
-
-  const PAD = 16, PW = 320, PH = 240;
-  const c   = document.createElement("canvas");
-  c.width   = PW + PAD * 2;
-  c.height  = photos.length * (PH + PAD) + PAD + 36;
-  const ctx = c.getContext("2d");
-
-  /* background */
-  ctx.fillStyle = "#fff0f5";
-  ctx.fillRect(0, 0, c.width, c.height);
-
-  /* footer label */
-  ctx.fillStyle  = "#d63870";
-  ctx.font       = "bold 16px sans-serif";
-  ctx.textAlign  = "center";
-  ctx.fillText("🐱 MEOWCAM 💖", c.width / 2, c.height - 10);
-
-  let loaded = 0;
-  const total = photos.length;
-
-  photos.forEach((photo, i) => {
-    const snap    = photo.querySelector("img.snap");
-    const stickers = photo.querySelectorAll("img.sticker");
-    const y = PAD + i * (PH + PAD);
-    const x = PAD;
-
-    const snapImg = new Image();
-    snapImg.crossOrigin = "anonymous";
-    snapImg.src = snap.src;
-
-    snapImg.onload = () => {
-      /* rounded clip for photo */
-      ctx.save();
-      ctx.beginPath();
-      roundRect(ctx, x, y, PW, PH, 12);
-      ctx.clip();
-      ctx.drawImage(snapImg, x, y, PW, PH);
-      ctx.restore();
-
-      /* ── STICKERS ON CANVAS ── */
-      /* get photo tile's on-screen size to scale sticker positions */
-      const pr = photo.getBoundingClientRect();
-
-      let stickersDone = 0;
-      const stickerCount = stickers.length;
-
-      if (stickerCount === 0) {
-        loaded++;
-        if (loaded === total) finalize(c);
-        return;
-      }
-
-      stickers.forEach(s => {
-        const si = new Image();
-        si.crossOrigin = "anonymous";
-        si.src = s.src;
-
-        si.onload = () => {
-          /* scale sticker position from screen pixels → canvas pixels */
-          const sl = parseFloat(s.style.left) || 0;
-          const st = parseFloat(s.style.top)  || 0;
-          const scaleX = PW / pr.width;
-          const scaleY = PH / pr.height;
-          const sw = s.offsetWidth  * scaleX;
-          const sh = s.offsetHeight * scaleY;
-          const sx = x + sl * scaleX;
-          const sy = y + st * scaleY;
-          ctx.drawImage(si, sx, sy, sw, sh);
-
-          stickersDone++;
-          if (stickersDone === stickerCount) {
-            loaded++;
-            if (loaded === total) finalize(c);
-          }
-        };
-        si.onerror = () => { stickersDone++; if (stickersDone === stickerCount){ loaded++; if(loaded===total) finalize(c); } };
-      });
-    };
-    snapImg.onerror = () => { loaded++; if (loaded === total) finalize(c); };
+  imgs.forEach(img=>{
+    ctx.drawImage(img,100,y,600,400);
+    y+=420;
   });
+
+  document.getElementById("finalImg").src=c.toDataURL();
+  document.getElementById("popup").style.display="block";
 }
 
-function finalize(c) {
-  finalDataUrl = c.toDataURL("image/png");
-  document.getElementById("popup-img").src = finalDataUrl;
-  document.getElementById("popup").style.display = "flex";
-}
-
-function downloadFromPopup() {
-  if (!finalDataUrl) return;
-  const a = document.createElement("a");
-  a.download = "meowcam_strip.png";
-  a.href     = finalDataUrl;
+function downloadFinal(){
+  const a=document.createElement("a");
+  a.href=document.getElementById("finalImg").src;
+  a.download="meowcam.png";
   a.click();
 }
 
-function closePopup() {
-  document.getElementById("popup").style.display = "none";
-}
-
-/* ══════════════════════════════
-   SAVE WITHOUT POPUP
-══════════════════════════════ */
-function downloadStrip() {
-  done();  /* reuse done() which builds + opens popup */
-}
-
-/* ── helper: rounded rect path ── */
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y); ctx.arcTo(x+w, y,   x+w, y+r,   r);
-  ctx.lineTo(x + w, y+h-r); ctx.arcTo(x+w, y+h, x+w-r,y+h, r);
-  ctx.lineTo(x + r, y+h);   ctx.arcTo(x,   y+h, x,   y+h-r, r);
-  ctx.lineTo(x, y + r);     ctx.arcTo(x,   y,   x+r, y,     r);
-  ctx.closePath();
+function closePopup(){
+  document.getElementById("popup").style.display="none";
 }
 
 </script>
+
 </body>
 </html>
