@@ -14,6 +14,7 @@ body{
   justify-content:center;
   align-items:center;
   min-height:100vh;
+  overflow:auto;
 }
 
 /* WRAPPER */
@@ -22,7 +23,6 @@ body{
   gap:15px;
   flex-wrap:wrap;
   justify-content:center;
-  align-items:flex-start;
 }
 
 /* CAMERA */
@@ -42,7 +42,7 @@ body{
   object-fit:cover;
 }
 
-/* CAMERA */
+/* CAMERA VIDEO */
 #video{
   position:absolute;
   top:50%;
@@ -65,6 +65,7 @@ body{
   background:transparent;
   border:none;
   cursor:pointer;
+  z-index:50;
 }
 
 /* COUNTDOWN */
@@ -76,6 +77,7 @@ body{
   font-size:45px;
   color:#ff2e6d;
   font-weight:bold;
+  z-index:1000;
 }
 
 /* FLASH */
@@ -85,44 +87,34 @@ body{
   background:white;
   opacity:0;
 }
-.flash.active{animation:flash .3s;}
+.flash.active{
+  animation:flash .3s;
+}
 @keyframes flash{
   0%{opacity:1;}
   100%{opacity:0;}
 }
 
-/* SIDE */
+/* SIDE LAYOUT FIXED */
 .side{
+  text-align:center;
+  max-height:90vh;
+  overflow:auto;
   display:flex;
-  flex-direction:row;
+  flex-direction:column;
+  align-items:center;
   gap:10px;
-  align-items:flex-start;
 }
 
-/* STRIP */
+/* STRIP (FIXED FIRST) */
 #strip{
   background:white;
   padding:10px;
   border-radius:15px;
   width:220px;
-  height:400px;
+  min-height:250px;
   box-shadow:0 10px 25px rgba(0,0,0,0.2);
-}
-
-/* STICKERS */
-.sticker-panel{
-  background:white;
-  padding:10px;
-  border-radius:15px;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  width:90px;
-}
-
-.sticker-panel img{
-  width:35px;
-  cursor:pointer;
+  z-index:2;
 }
 
 /* PHOTO */
@@ -137,30 +129,44 @@ body{
   border-radius:10px;
 }
 
+/* STICKERS (RIGHT SIDE AREA, BELOW STRIP) */
+.sticker-panel{
+  background:white;
+  padding:10px;
+  border-radius:15px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  justify-content:center;
+  width:220px;
+  z-index:1;
+}
+
+.sticker-panel img{
+  width:35px;
+  cursor:pointer;
+}
+
 /* STICKER */
 .sticker{
   position:absolute;
   width:55px;
   z-index:9999;
-  touch-action:none;
-  user-select:none;
 }
 
-/* ✅ FIXED FILTERS (VISIBLE ALWAYS NOW) */
+/* FILTERS */
 .filters{
-  width:290px;
-  margin:10px auto 0 auto;
+  margin-top:10px;
   display:flex;
-  flex-wrap:wrap;
-  justify-content:center;
-  gap:6px;
-  background:rgba(255,255,255,0.85);
-  padding:8px;
-  border-radius:12px;
+  flex-direction:column;
+  gap:8px;
+  align-items:center;
+  width:100%;
 }
 
 /* BUTTON */
 button{
+  margin-top:10px;
   padding:8px 12px;
   border:none;
   border-radius:10px;
@@ -169,14 +175,15 @@ button{
   cursor:pointer;
 }
 
-/* CREDIT */
+/* CREDIT (BELOW EVERYTHING) */
 .credit{
-  margin-top:10px;
+  margin-top:5px;
   font-size:12px;
   background:white;
   padding:8px;
   border-radius:10px;
-  text-align:center;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+  width:220px;
 }
 </style>
 </head>
@@ -185,6 +192,7 @@ button{
 
 <div class="wrapper">
 
+<!-- CAMERA -->
 <div class="container">
 
 <video class="bg-video" autoplay muted loop>
@@ -204,21 +212,9 @@ button{
 <!-- SIDE -->
 <div class="side">
 
-<div>
-  <div id="strip"></div>
+<div id="strip"></div>
 
-  <!-- FILTERS NOW BELOW STRIP (VISIBLE ON ALL DEVICES) -->
-  <div class="filters">
-    <button onclick="setFilter('none')">Normal</button>
-    <button onclick="setFilter('contrast(1.2)')">Bright</button>
-    <button onclick="setFilter('sepia(1)')">Vintage</button>
-    <button onclick="setFilter('grayscale(1)')">B&W</button>
-    <button onclick="setFilter('brightness(1.3)')">Glow</button>
-  </div>
-
-  <div class="credit">By <b>Aafiya Kapadwala</b></div>
-</div>
-
+<!-- STICKERS (NOW RIGHT SIDE OF STRIP LOGICALLY) -->
 <div class="sticker-panel">
 <img src="2.jpg" onclick="addSticker(this.src)">
 <img src="3.png" onclick="addSticker(this.src)">
@@ -226,6 +222,20 @@ button{
 <img src="6.png" onclick="addSticker(this.src)">
 <img src="7.png" onclick="addSticker(this.src)">
 <img src="8.png" onclick="addSticker(this.src)">
+</div>
+
+<div class="filters">
+<button onclick="setFilter('none')">Normal</button>
+<button onclick="setFilter('contrast(1.2)')">Bright</button>
+<button onclick="setFilter('sepia(1)')">Vintage</button>
+<button onclick="setFilter('grayscale(1)')">B&W</button>
+<button onclick="setFilter('brightness(1.3)')">Glow</button>
+</div>
+
+<button onclick="downloadStrip()">DOWNLOAD 💾</button>
+
+<div class="credit">
+By <b>Aafiya Kapadwala</b>
 </div>
 
 </div>
@@ -275,6 +285,7 @@ function capture(){
   canvas.height=video.videoHeight;
 
   const ctx=canvas.getContext("2d");
+
   ctx.filter=currentFilter;
   ctx.translate(canvas.width,0);
   ctx.scale(-1,1);
@@ -304,7 +315,7 @@ async function startBooth(){
   }
 }
 
-/* STICKER DRAG FIX */
+/* STICKER */
 function addSticker(src){
   if(!currentPhoto) return;
 
@@ -315,38 +326,36 @@ function addSticker(src){
   s.style.left="40px";
   s.style.top="40px";
 
-  drag(s);
   currentPhoto.appendChild(s);
 }
 
-function drag(el){
-  let dragging=false,ox=0,oy=0;
+/* DOWNLOAD */
+function downloadStrip(){
 
-  el.addEventListener("mousedown",start);
-  el.addEventListener("touchstart",start);
+  const photos=document.querySelectorAll(".photo");
 
-  function start(e){
-    dragging=true;
-    const p=e.touches?e.touches[0]:e;
-    ox=p.clientX-el.offsetLeft;
-    oy=p.clientY-el.offsetTop;
-  }
+  const c=document.createElement("canvas");
+  const ctx=c.getContext("2d");
 
-  document.addEventListener("mousemove",move);
-  document.addEventListener("touchmove",move,{passive:false});
+  c.width=1080;
+  c.height=1920;
 
-  function move(e){
-    if(!dragging) return;
+  ctx.fillStyle="white";
+  ctx.fillRect(0,0,c.width,c.height);
 
-    const p=e.touches?e.touches[0]:e;
-    const box=el.parentElement.getBoundingClientRect();
+  let y=100;
 
-    el.style.left=(p.clientX-box.left-ox)+"px";
-    el.style.top=(p.clientY-box.top-oy)+"px";
-  }
+  photos.forEach(p=>{
+    const img=p.querySelector("img");
+    ctx.drawImage(img,300,y,480,360);
+    y+=400;
+  });
 
-  document.addEventListener("mouseup",()=>dragging=false);
-  document.addEventListener("touchend",()=>dragging=false);
+  const a=document.createElement("a");
+  a.download="meowcam.png";
+  a.href=c.toDataURL("image/png");
+
+  a.click();
 }
 
 </script>
