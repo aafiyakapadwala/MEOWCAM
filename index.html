@@ -17,7 +17,6 @@ body{
   overflow:auto;
 }
 
-/* WRAPPER */
 .wrapper{
   display:flex;
   gap:15px;
@@ -25,7 +24,6 @@ body{
   justify-content:center;
 }
 
-/* CAMERA */
 .container{
   position:relative;
   width:350px;
@@ -34,7 +32,6 @@ body{
   overflow:hidden;
 }
 
-/* BG */
 .bg-video{
   position:absolute;
   width:100%;
@@ -42,7 +39,6 @@ body{
   object-fit:cover;
 }
 
-/* CAMERA VIDEO */
 #video{
   position:absolute;
   top:50%;
@@ -54,7 +50,6 @@ body{
   object-fit:cover;
 }
 
-/* BUTTON */
 .main-btn{
   position:absolute;
   bottom:20px;
@@ -68,7 +63,6 @@ body{
   z-index:50;
 }
 
-/* COUNTDOWN */
 #countdown{
   position:absolute;
   top:220px;
@@ -80,22 +74,15 @@ body{
   z-index:1000;
 }
 
-/* FLASH */
 .flash{
   position:absolute;
   inset:0;
   background:white;
   opacity:0;
 }
-.flash.active{
-  animation:flash .3s;
-}
-@keyframes flash{
-  0%{opacity:1;}
-  100%{opacity:0;}
-}
+.flash.active{ animation:flash .3s; }
+@keyframes flash{ 0%{opacity:1;} 100%{opacity:0;} }
 
-/* SIDE LAYOUT FIXED */
 .side{
   text-align:center;
   max-height:90vh;
@@ -106,7 +93,6 @@ body{
   gap:10px;
 }
 
-/* STRIP (FIXED FIRST) */
 #strip{
   background:white;
   padding:10px;
@@ -114,10 +100,8 @@ body{
   width:220px;
   min-height:250px;
   box-shadow:0 10px 25px rgba(0,0,0,0.2);
-  z-index:2;
 }
 
-/* PHOTO */
 .photo{
   position:relative;
   width:200px;
@@ -129,7 +113,14 @@ body{
   border-radius:10px;
 }
 
-/* STICKERS (RIGHT SIDE AREA, BELOW STRIP) */
+/* FIXED STICKER SYSTEM */
+.sticker{
+  position:absolute;
+  width:55px;
+  cursor:move;
+  z-index:9999;
+}
+
 .sticker-panel{
   background:white;
   padding:10px;
@@ -139,7 +130,6 @@ body{
   gap:5px;
   justify-content:center;
   width:220px;
-  z-index:1;
 }
 
 .sticker-panel img{
@@ -147,26 +137,15 @@ body{
   cursor:pointer;
 }
 
-/* STICKER */
-.sticker{
-  position:absolute;
-  width:55px;
-  z-index:9999;
-}
-
-/* FILTERS */
 .filters{
   margin-top:10px;
   display:flex;
   flex-direction:column;
   gap:8px;
   align-items:center;
-  width:100%;
 }
 
-/* BUTTON */
 button{
-  margin-top:10px;
   padding:8px 12px;
   border:none;
   border-radius:10px;
@@ -175,15 +154,32 @@ button{
   cursor:pointer;
 }
 
-/* CREDIT (BELOW EVERYTHING) */
 .credit{
   margin-top:5px;
   font-size:12px;
   background:white;
   padding:8px;
   border-radius:10px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.1);
   width:220px;
+}
+
+/* PREVIEW POPUP */
+#previewBox{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:white;
+  padding:15px;
+  border-radius:15px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.3);
+  display:none;
+  z-index:99999;
+  text-align:center;
+}
+#previewBox img{
+  width:250px;
+  border-radius:10px;
 }
 </style>
 </head>
@@ -192,7 +188,6 @@ button{
 
 <div class="wrapper">
 
-<!-- CAMERA -->
 <div class="container">
 
 <video class="bg-video" autoplay muted loop>
@@ -209,12 +204,10 @@ button{
 
 </div>
 
-<!-- SIDE -->
 <div class="side">
 
 <div id="strip"></div>
 
-<!-- STICKERS (NOW RIGHT SIDE OF STRIP LOGICALLY) -->
 <div class="sticker-panel">
 <img src="2.jpg" onclick="addSticker(this.src)">
 <img src="3.png" onclick="addSticker(this.src)">
@@ -242,56 +235,51 @@ By <b>Aafiya Kapadwala</b>
 
 </div>
 
+<!-- PREVIEW BOX -->
+<div id="previewBox">
+  <h3>Strip Ready 💖</h3>
+  <img id="finalImg">
+  <br><br>
+  <button onclick="finalDownload()">Download</button>
+  <button onclick="closePreview()">Close</button>
+</div>
+
 <script>
 
 const video=document.getElementById("video");
 const canvas=document.getElementById("canvas");
 const strip=document.getElementById("strip");
-const countdown=document.getElementById("countdown");
-const flash=document.getElementById("flash");
 
 let currentPhoto=null;
 let currentFilter="none";
 
-/* CAMERA */
 navigator.mediaDevices.getUserMedia({video:true})
 .then(s=>video.srcObject=s);
 
-/* FILTER */
 function setFilter(f){
   currentFilter=f;
   video.style.filter=f;
 }
 
-/* TIMER */
 async function timer(){
   const steps=["Ready...","Set...","Paws 🐾"];
   for(let t of steps){
-    countdown.innerText=t;
     await new Promise(r=>setTimeout(r,700));
   }
-  countdown.innerText="";
 }
 
-/* FLASH */
 function flashEffect(){
-  flash.classList.add("active");
-  setTimeout(()=>flash.classList.remove("active"),300);
 }
 
-/* CAPTURE */
 function capture(){
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
-
   const ctx=canvas.getContext("2d");
 
   ctx.filter=currentFilter;
   ctx.translate(canvas.width,0);
   ctx.scale(-1,1);
   ctx.drawImage(video,0,0);
-
-  flashEffect();
 
   const div=document.createElement("div");
   div.className="photo";
@@ -305,17 +293,15 @@ function capture(){
   currentPhoto=div;
 }
 
-/* BOOTH */
 async function startBooth(){
   strip.innerHTML="";
   for(let i=0;i<3;i++){
     await timer();
     capture();
-    await new Promise(r=>setTimeout(r,400));
   }
 }
 
-/* STICKER */
+/* DRAG STICKER */
 function addSticker(src){
   if(!currentPhoto) return;
 
@@ -327,12 +313,28 @@ function addSticker(src){
   s.style.top="40px";
 
   currentPhoto.appendChild(s);
+
+  let drag=false,ox=0,oy=0;
+
+  s.onmousedown=(e)=>{
+    drag=true;
+    ox=e.offsetX;
+    oy=e.offsetY;
+  };
+
+  document.onmousemove=(e)=>{
+    if(!drag) return;
+    const box=currentPhoto.getBoundingClientRect();
+    s.style.left=(e.clientX-box.left-ox)+"px";
+    s.style.top=(e.clientY-box.top-oy)+"px";
+  };
+
+  document.onmouseup=()=>drag=false;
 }
 
-/* DOWNLOAD */
+/* PREVIEW */
 function downloadStrip(){
-
-  const photos=document.querySelectorAll(".photo");
+  const imgs=document.querySelectorAll(".photo img");
 
   const c=document.createElement("canvas");
   const ctx=c.getContext("2d");
@@ -345,17 +347,26 @@ function downloadStrip(){
 
   let y=100;
 
-  photos.forEach(p=>{
-    const img=p.querySelector("img");
+  imgs.forEach(img=>{
     ctx.drawImage(img,300,y,480,360);
     y+=400;
   });
 
-  const a=document.createElement("a");
-  a.download="meowcam.png";
-  a.href=c.toDataURL("image/png");
+  const data=c.toDataURL();
 
+  document.getElementById("finalImg").src=data;
+  document.getElementById("previewBox").style.display="block";
+}
+
+function finalDownload(){
+  const a=document.createElement("a");
+  a.href=document.getElementById("finalImg").src;
+  a.download="meowcam-strip.png";
   a.click();
+}
+
+function closePreview(){
+  document.getElementById("previewBox").style.display="none";
 }
 
 </script>
