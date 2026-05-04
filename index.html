@@ -202,6 +202,7 @@ button{
   <br><br>
   <button onclick="downloadFinal()">Download</button>
   <button onclick="closePopup()">Close</button>
+  <div id="countdown"></div>
 </div>
 
 <script>
@@ -237,12 +238,26 @@ function capture(){
 
   currentPhoto=div;
 }
+const countdown=document.getElementById("countdown");
 
+async function timer(){
+  const steps=["Ready...","Set...","Paws 🐾"];
+
+  for(let t of steps){
+    countdown.innerText=t;
+    await new Promise(r=>setTimeout(r,700));
+  }
+
+  countdown.innerText="";
+}
 /* START */
-function startBooth(){
+ async function startBooth(){
   strip.innerHTML="";
+
   for(let i=0;i<3;i++){
-    setTimeout(capture,i*700);
+    await timer();      // 👈 countdown restored here
+    capture();
+    await new Promise(r=>setTimeout(r,400));
   }
 }
 
