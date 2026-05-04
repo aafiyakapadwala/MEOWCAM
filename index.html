@@ -286,14 +286,17 @@ function flashEffect(){
 }
 
 /* COUNTDOWN FIX */
-async function timer(){
-  const steps=["Ready...","Set...","Paws 🐾"];
-  for(let t of steps){
-    countdown.innerText=t;
-    await new Promise(r=>setTimeout(r,700));
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function timer() {
+  const steps = ["Ready 🐾", "Set 😺", "Paws! 🐱"];
+  for (const t of steps) {
+    countdownEl.textContent = t;
+    await wait(700);
   }
-  countdown.innerText="";
+  countdownEl.textContent = "";
 }
+
 
 /* CAPTURE */
 function capture(){
@@ -320,6 +323,8 @@ function capture(){
 
   currentPhoto=div;
 }
+const div = document.createElement("div");
+  div.className = "photo";
 
 /* BOOTH */
 async function startBooth(){
