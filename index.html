@@ -3,19 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MEOWCAM V3 🐱💖</title>
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<title>MEOWCAM V2 🐱💖</title>
 
 <style>
 body{
   margin:0;
   font-family:"Comic Sans MS",cursive;
   background:linear-gradient(#ffd6e0,#fff0f5);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
 }
 
-/* CAMERA BOX */
-.camera-box{
+/* WRAPPER */
+.wrapper{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:flex-start;
+}
+
+/* CAMERA */
+.container{
   position:relative;
   width:350px;
   height:700px;
@@ -23,7 +34,7 @@ body{
   overflow:hidden;
 }
 
-/* BACKGROUND */
+/* BG */
 .bg-video{
   position:absolute;
   width:100%;
@@ -36,11 +47,24 @@ body{
   position:absolute;
   top:50%;
   left:50%;
-  transform:translate(-50%,-50%) rotateY(180deg);
+  transform:translate(-50%, -50%) rotateY(180deg);
   width:290px;
   height:295px;
   border-radius:15px;
   object-fit:cover;
+}
+
+/* BUTTON */
+.main-btn{
+  position:absolute;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  width:90px;
+  height:90px;
+  background:transparent;
+  border:none;
+  cursor:pointer;
 }
 
 /* COUNTDOWN */
@@ -49,7 +73,7 @@ body{
   top:220px;
   left:50%;
   transform:translate(-50%,-50%);
-  font-size:40px;
+  font-size:45px;
   color:#ff2e6d;
   font-weight:bold;
 }
@@ -61,21 +85,18 @@ body{
   background:white;
   opacity:0;
 }
-.flash.active{
-  animation:flash .3s;
-}
+.flash.active{animation:flash .3s;}
 @keyframes flash{
   0%{opacity:1;}
   100%{opacity:0;}
 }
 
-/* FILTERS */
-.filters{
-  margin-top:10px;
+/* SIDE */
+.side{
   display:flex;
-  justify-content:center;
-  gap:5px;
-  flex-wrap:wrap;
+  flex-direction:row;
+  gap:10px;
+  align-items:flex-start;
 }
 
 /* STRIP */
@@ -84,100 +105,119 @@ body{
   padding:10px;
   border-radius:15px;
   width:220px;
-  min-height:250px;
+  height:400px;
   box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
-/* PHOTO DROP ANIMATION */
+/* STICKERS */
+.sticker-panel{
+  background:white;
+  padding:10px;
+  border-radius:15px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  width:90px;
+}
+
+.sticker-panel img{
+  width:35px;
+  cursor:pointer;
+}
+
+/* PHOTO */
 .photo{
+  position:relative;
   width:200px;
   margin:10px auto;
-  animation:drop .4s ease;
 }
 
-@keyframes drop{
-  from{transform:translateY(-30px);opacity:0;}
-  to{transform:translateY(0);opacity:1;}
+.photo img{
+  width:100%;
+  border-radius:10px;
 }
 
-/* STICKER BOX */
-.sticker-box{
+/* STICKER */
+.sticker{
   position:absolute;
-  width:80px;
-  cursor:move;
-  transition:0.1s;
+  width:55px;
+  z-index:9999;
+  touch-action:none;
+  user-select:none;
 }
 
-/* HANDLE */
-.handle{
-  width:14px;
-  height:14px;
-  background:#ff4d88;
-  position:absolute;
-  right:0;
-  bottom:0;
-  border-radius:50%;
-  cursor:nwse-resize;
+/* ✅ FIXED FILTERS (VISIBLE ALWAYS NOW) */
+.filters{
+  width:290px;
+  margin:10px auto 0 auto;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:6px;
+  background:rgba(255,255,255,0.85);
+  padding:8px;
+  border-radius:12px;
 }
 
-/* STICKERS PANEL */
-.sticker-panel img{
-  width:40px;
+/* BUTTON */
+button{
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  background:#ff8fab;
+  color:white;
   cursor:pointer;
-  margin:3px;
 }
 
 /* CREDIT */
 .credit{
+  margin-top:10px;
   font-size:12px;
   background:white;
-  padding:6px;
+  padding:8px;
   border-radius:10px;
   text-align:center;
-  margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container-fluid py-3">
-<div class="row justify-content-center">
+<div class="wrapper">
 
-<!-- CAMERA -->
-<div class="col-lg-4 col-md-6 col-12 d-flex flex-column align-items-center">
-
-<div class="camera-box">
+<div class="container">
 
 <video class="bg-video" autoplay muted loop>
 <source src="billu.mp4">
 </video>
 
 <video id="video" autoplay playsinline></video>
-<canvas id="canvas" class="d-none"></canvas>
+<canvas id="canvas" style="display:none;"></canvas>
 
 <div id="countdown"></div>
 <div class="flash" id="flash"></div>
 
-</div>
-
-<!-- FILTERS (FIXED BELOW CAMERA) -->
-<div class="filters mt-2">
-<button onclick="setFilter('none')" class="btn btn-sm btn-light">Normal</button>
-<button onclick="setFilter('contrast(1.2)')" class="btn btn-sm btn-light">Bright</button>
-<button onclick="setFilter('sepia(1)')" class="btn btn-sm btn-light">Vintage</button>
-<button onclick="setFilter('grayscale(1)')" class="btn btn-sm btn-light">B&W</button>
-<button onclick="setFilter('brightness(1.3)')" class="btn btn-sm btn-light">Glow</button>
-</div>
-
-<button class="btn btn-danger mt-2" onclick="startBooth()">CLICK 📸</button>
+<button class="main-btn" onclick="startBooth()"></button>
 
 </div>
 
 <!-- SIDE -->
-<div class="col-lg-4 col-md-6 col-12 d-flex gap-2">
+<div class="side">
 
-<div id="strip"></div>
+<div>
+  <div id="strip"></div>
+
+  <!-- FILTERS NOW BELOW STRIP (VISIBLE ON ALL DEVICES) -->
+  <div class="filters">
+    <button onclick="setFilter('none')">Normal</button>
+    <button onclick="setFilter('contrast(1.2)')">Bright</button>
+    <button onclick="setFilter('sepia(1)')">Vintage</button>
+    <button onclick="setFilter('grayscale(1)')">B&W</button>
+    <button onclick="setFilter('brightness(1.3)')">Glow</button>
+  </div>
+
+  <div class="credit">By <b>Aafiya Kapadwala</b></div>
+</div>
 
 <div class="sticker-panel">
 <img src="2.jpg" onclick="addSticker(this.src)">
@@ -191,19 +231,19 @@ body{
 </div>
 
 </div>
-</div>
 
 <script>
 
 const video=document.getElementById("video");
 const canvas=document.getElementById("canvas");
 const strip=document.getElementById("strip");
-const flash=document.getElementById("flash");
 const countdown=document.getElementById("countdown");
+const flash=document.getElementById("flash");
 
 let currentPhoto=null;
 let currentFilter="none";
 
+/* CAMERA */
 navigator.mediaDevices.getUserMedia({video:true})
 .then(s=>video.srcObject=s);
 
@@ -215,7 +255,8 @@ function setFilter(f){
 
 /* TIMER */
 async function timer(){
-  for(let t of ["Ready...","Set...","Paws 🐾"]){
+  const steps=["Ready...","Set...","Paws 🐾"];
+  for(let t of steps){
     countdown.innerText=t;
     await new Promise(r=>setTimeout(r,700));
   }
@@ -228,7 +269,7 @@ function flashEffect(){
   setTimeout(()=>flash.classList.remove("active"),300);
 }
 
-/* CAPTURE + PRINT ANIMATION */
+/* CAPTURE */
 function capture(){
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
@@ -263,65 +304,49 @@ async function startBooth(){
   }
 }
 
-/* STICKER */
+/* STICKER DRAG FIX */
 function addSticker(src){
   if(!currentPhoto) return;
 
-  const box=document.createElement("div");
-  box.className="sticker-box";
-  box.style.left="40px";
-  box.style.top="40px";
+  const s=document.createElement("img");
+  s.src=src;
+  s.className="sticker";
 
-  const img=document.createElement("img");
-  img.src=src;
-  img.style.width="100%";
+  s.style.left="40px";
+  s.style.top="40px";
 
-  const handle=document.createElement("div");
-  handle.className="handle";
-
-  box.appendChild(img);
-  box.appendChild(handle);
-  currentPhoto.appendChild(box);
-
-  drag(box);
-  resize(box,handle);
+  drag(s);
+  currentPhoto.appendChild(s);
 }
 
-/* DRAG */
 function drag(el){
-  let drag=false,ox=0,oy=0;
+  let dragging=false,ox=0,oy=0;
 
-  el.onmousedown=e=>{
-    drag=true;
-    ox=e.clientX-el.offsetLeft;
-    oy=e.clientY-el.offsetTop;
-  };
+  el.addEventListener("mousedown",start);
+  el.addEventListener("touchstart",start);
 
-  document.onmousemove=e=>{
-    if(!drag) return;
-    const p=el.parentElement.getBoundingClientRect();
-    el.style.left=(e.clientX-p.left-ox)+"px";
-    el.style.top=(e.clientY-p.top-oy)+"px";
-  };
+  function start(e){
+    dragging=true;
+    const p=e.touches?e.touches[0]:e;
+    ox=p.clientX-el.offsetLeft;
+    oy=p.clientY-el.offsetTop;
+  }
 
-  document.onmouseup=()=>drag=false;
-}
+  document.addEventListener("mousemove",move);
+  document.addEventListener("touchmove",move,{passive:false});
 
-/* RESIZE */
-function resize(box,handle){
-  let resizing=false;
+  function move(e){
+    if(!dragging) return;
 
-  handle.onmousedown=e=>{
-    resizing=true;
-    e.stopPropagation();
-  };
+    const p=e.touches?e.touches[0]:e;
+    const box=el.parentElement.getBoundingClientRect();
 
-  document.onmousemove=e=>{
-    if(!resizing) return;
-    box.style.width=(box.offsetWidth + e.movementX)+"px";
-  };
+    el.style.left=(p.clientX-box.left-ox)+"px";
+    el.style.top=(p.clientY-box.top-oy)+"px";
+  }
 
-  document.onmouseup=()=>resizing=false;
+  document.addEventListener("mouseup",()=>dragging=false);
+  document.addEventListener("touchend",()=>dragging=false);
 }
 
 </script>
